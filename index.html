@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Chat Interface</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐍 Python Interactive Chat</h1>
+            <p>Run Python code directly in your browser!</p>
+        </header>
+        
+        <div class="chat-container">
+            <div id="chat-output" class="chat-output">
+                <div class="message system-message">
+                    <div class="message-content">
+                        <strong>System:</strong> Initializing Python environment... Please wait.
+                    </div>
+                    <div class="timestamp"></div>
+                </div>
+            </div>
+            
+            <div class="input-container">
+                <div class="input-group">
+                    <input type="text" id="user-input" placeholder="Waiting for program..." disabled>
+                    <button id="send-button" disabled>Send</button>
+                </div>
+                <div class="controls">
+                    <button id="run-script-button" disabled>Run Python Program</button>
+                    <button id="clear-button">Clear Chat</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <span id="status">Loading Pyodide...</span>
+            <span id="python-version"></span>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
