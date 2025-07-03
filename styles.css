@@ -21,9 +21,9 @@ body {
     overflow: hidden;
     width: 100%;
     max-width: 800px;
-    height: 80vh;
-    max-height: 800px;
-    min-height: 600px;
+    min-height: min(600px, 80vh);
+    height: calc(100vh - 40px); /* Full height minus top/bottom padding */
+    max-height: none;
     display: flex;
     flex-direction: column;
     position: relative;
