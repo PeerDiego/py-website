@@ -5,7 +5,7 @@ print("🎉 Welcome to the Interactive Python Chat!")
 
 # Simple interaction test
 name = input("What's your name? ")
-print(f"Hello, {name}! Nice to meet you! 👋")
+print(f"Hello, {name.title()}! Nice to meet you! 👋")
 
 age = input("How old are you? ")
 print(f"You said you are {age} years old.")

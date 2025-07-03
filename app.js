@@ -44,6 +44,9 @@ js_input = globals()['js_input']
 def new_print(*args, **kwargs):
     text = ' '.join(str(arg) for arg in args)
     js_print(text)
+    # Also log to browser console for debugging
+    from js import console
+    console.log(f"Python print: {text}")
 
 # Override input - this will work with await in the async context
 async def new_input(prompt=""):
