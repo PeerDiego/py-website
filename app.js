@@ -35,6 +35,7 @@ async function initializePyodide() {
         
         await pyodide.runPythonAsync(`
 import builtins
+import asyncio
 
 # Get JS functions
 js_print = globals()['js_print']
@@ -53,8 +54,16 @@ async def new_input(prompt=""):
     result = await js_input(str(prompt) if prompt else "")
     return str(result) if result is not None else ""
 
+# Override time.sleep with async version
+async def new_sleep(seconds):
+    await asyncio.sleep(seconds)
+
 builtins.print = new_print
 builtins.input = new_input
+
+# Override time.sleep when time module is imported
+import time
+time.sleep = new_sleep
 
 print("Python environment ready!")
         `);
@@ -168,10 +177,14 @@ async function runPythonProgram() {
     
     try {
         // Wrap the program in an async function and replace input calls with await input
+        // Also replace time.sleep calls with await time.sleep for non-blocking delays
         // This allows synchronous Python input() calls to work with async JavaScript Promises
         const asyncProgram = `
 async def main():
-${pythonProgram.replace(/input\(/g, 'await input(').split('\n').map(line => '    ' + line).join('\n')}
+${pythonProgram
+    .replace(/input\(/g, 'await input(')
+    .replace(/time\.sleep\(/g, 'await time.sleep(')
+    .split('\n').map(line => '    ' + line).join('\n')}
 
 await main()
         `;
