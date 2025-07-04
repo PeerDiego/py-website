@@ -1,24 +1,24 @@
-# Python Interactive Chat Interface
+# Monday: A Python Text Adventure in Your Browser
 
-A modern web application that runs Python programs directly in the browser using Pyodide. The Python code is in a separate file and the chat interface displays the program's output and handles user input prompts.
+This project brings the classic, comedic text adventure **"Monday"** to the web! Play through a wild, unpredictable school day full of choices, jokes, and bizarre outcomes—all running in your browser thanks to Pyodide.
 
 ## Features
 
-- ✨ **Client-side Python execution** using Pyodide
-- 💬 **Chat interface** displaying Python program output
-- 📝 **Separate Python file** for easy code management
-- 📥 **Interactive input handling** when Python prompts for user input
-- 🎨 **Beautiful, modern UI** with animations and gradients
-- � **Real-time output display** as the program runs
+- 🎮 **Play "Monday"—a full-length, branching text adventure**
+- 🤣 **Humorous writing and unpredictable outcomes**
+- 🏫 **Navigate a day in the life of a high school student**
+- 💬 **Interactive chat interface for game narration and choices**
+- ✨ **Runs entirely in your browser—no server needed**
+- 💾 **(Optional) Save/load support if cryptography is available**
 - 📱 **Responsive design** that works on mobile and desktop
 
-## How to Use
+## How to Play
 
 1. **Open `index.html`** in any modern web browser
-2. **Wait for initialization** - Pyodide will load automatically
-3. **Click "Run Python Program"** to start the interactive program
-4. **Respond to prompts** in the input box when the program asks for input
-5. **Watch the output** appear in the chat interface in real-time
+2. **Wait for initialization** — Pyodide will load automatically
+3. **Click "Run Python Program"** to start "Monday"
+4. **Make choices** as prompted to guide your character through the day
+5. **See the story unfold** in the chat interface
 
 ## Project Structure
 
@@ -26,58 +26,33 @@ A modern web application that runs Python programs directly in the browser using
 ├── index.html      # Main HTML file with chat interface
 ├── styles.css      # Modern CSS styling  
 ├── app.js          # JavaScript for Pyodide integration
-├── main.py         # Your Python program (edit this!)
+├── main.py         # A Python test program (can edit this!)
+├── monday.py       # The "Monday" text adventure game
 └── README.md       # This file
 ```
 
-## The Python Program (main.py)
+## About the Game (monday.py)
 
-The included `main.py` file contains a simple interactive program that:
+The included `monday.py` file is a full-featured, branching text adventure. You play as a high school student trying to survive the world’s worst Monday. Make choices, explore different paths, and try to reach a good ending—if you can!
 
-- 👋 **Welcomes the user** with a friendly greeting
-- 📝 **Asks for the user's name** and responds personally
-- 🎂 **Asks for the user's age** and acknowledges it
-- 💬 **Demonstrates basic input/output** in the browser environment
+- 🛏️ **Wake up and face the chaos of Monday**
+- 🚌 **Navigate school, social situations, and bizarre events**
+- 💀 **Many ways to lose, a few ways to win!**
+- 🤪 **Packed with jokes, pop culture, and absurd scenarios**
 
-This is a simple demonstration program that shows how Python `input()` and `print()` functions work seamlessly in the browser chat interface.
-
-## How It Works
-
-1. **Python Output**: All `print()` statements appear in the chat as "Python" messages
-2. **User Input**: When Python calls `input()`, the interface prompts the user
-3. **Real-time Display**: Output appears immediately as the program runs
-4. **Error Handling**: Python errors are displayed clearly in the chat
-
-## Customizing the Python Program
-
-Edit `main.py` to create your own interactive program:
-
-```python
-# Your custom Python program
-print("Welcome to my custom program!")
-
-name = input("What's your name? ")
-print(f"Hello, {name}!")
-
-age = input("How old are you? ")
-print(f"You are {age} years old.")
-
-# Add your own logic here...
-```
-
-## Example Interactions
-
-The chat interface will show:
+## Example Interaction
 
 ```text
-🤖 Python: 🎉 Welcome to the Interactive Python Chat!
-🤖 Python: What's your name?
-👤 User: Alice
-🤖 Python: Hello, Alice! Nice to meet you! 👋
-🤖 Python: How old are you?
-👤 User: 25
-🤖 Python: You said you are 25 years old.
-🤖 Python: This demonstrates Python input/output in the browser.
+🤖 Python: YOU'RE IN BED, ASLEEP.
+🤖 Python: IT'S 5:15 A.M.
+🤖 Python: YOUR STEREO TURNS ON AND A LOCAL RADIO STATION IS PLAYING A SONG BY PRINCE.
+🤖 Python: WHAT A BAD WAY TO START A DAY!
+🤖 Python:   YOU WAKE UP
+  1. SNOOZE
+  2. GET UP
+  3. SMASH STEREO
+👤 User: 2
+🤖 Python: YOU GET UP AND STRETCH. AS YOU TAKE A DEEP BREATH, FOULNESS INVADES YOUR NOSTRILS...
 ```
 
 ## Technical Details
@@ -114,4 +89,4 @@ Since this is a pure client-side application, you can deploy it anywhere:
 - Memory usage is reasonable for most applications
 - The chat interface remains responsive during Python execution
 
-Enjoy coding Python in the browser! 🐍✨
+Enjoy surviving Monday in the browser! 🐍🎮
