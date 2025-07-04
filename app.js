@@ -90,10 +90,12 @@ print("Python environment ready!")
 // Load Python program
 async function loadPythonProgram() {
     try {
-        const response = await fetch('main.py');
+        let filename = 'main.py';
+        filename = 'test.py';
+        const response = await fetch(filename);
         if (response.ok) {
             pythonProgram = await response.text();
-            console.log('Loaded main.py successfully');
+            console.log(`Loaded ${filename} successfully`);
         } else {
             throw new Error(`HTTP ${response.status}`);
         }
@@ -101,7 +103,6 @@ async function loadPythonProgram() {
         console.log('Using fallback program');
         pythonProgram = `
 print("🎉 Welcome to Python Interactive Chat!")
-print("=" * 50)
 
 name = input("What's your name? ")
 print(f"Hello, {name}! Nice to meet you!")
