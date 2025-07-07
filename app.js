@@ -14,6 +14,9 @@ const clearButton = document.getElementById('clear-button');
 const status = document.getElementById('status');
 const pythonVersion = document.getElementById('python-version');
 
+// Import from the transformInputToAsync module
+import { transformPythonForPyodide } from './transformInputToAsync.js';
+
 // Initialize Pyodide
 async function initializePyodide() {
     try {
@@ -90,12 +93,14 @@ print("Python environment ready!")
 // Load Python program
 async function loadPythonProgram() {
     try {
-        let filename = 'main.py';
-        filename = 'test.py';
+        // Get the filename from the hidden input in the HTML
+        const filename = document.getElementById('python-file').value || 'main.py';
         const response = await fetch(filename);
         if (response.ok) {
-            pythonProgram = await response.text();
-            console.log(`Loaded ${filename} successfully`);
+            let rawCode = await response.text();
+            // Transform the code to async/await style
+            pythonProgram = transformPythonForPyodide(rawCode);
+            console.log(`Loaded and transformed ${filename} successfully:\n${pythonProgram}`);
         } else {
             throw new Error(`HTTP ${response.status}`);
         }
@@ -177,15 +182,11 @@ async function runPythonProgram() {
     addMessage('system', 'Starting Python program...');
     
     try {
-        // Wrap the program in an async function and replace input calls with await input
-        // Also replace time.sleep calls with await time.sleep for non-blocking delays
-        // This allows synchronous Python input() calls to work with async JavaScript Promises
+        // Wrap the transformed program in an async function
+        // This allows synchronous Python input() and time.sleep() calls to work with async JavaScript Promises
         const asyncProgram = `
 async def main():
-${pythonProgram
-    .replace(/input\(/g, 'await input(')
-    .replace(/time\.sleep\(/g, 'await time.sleep(')
-    .split('\n').map(line => '    ' + line).join('\n')}
+${pythonProgram.split('\n').map(line => '    ' + line).join('\n')}
 
 await main()
         `;

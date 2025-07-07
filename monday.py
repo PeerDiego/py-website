@@ -221,7 +221,7 @@ def credits():
         # Print the current window
         for line in scroll_lines[i:i+window]:
             print(line)
-        time.sleep(0.9)
+        wait(0.9)
     LMNDY[1] += 1
     save_lmndy()
     quit_game()

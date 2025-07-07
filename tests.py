@@ -61,7 +61,7 @@ sys.stdout.flush()
 print("[TEST 12] Use time.sleep")
 print("Sleeping...")
 time.sleep(1) 
-# TODO: address unexpected behavior in browser
+# FIXED: addressed unexpected behavior in browser
 # the wait is observed in the browser console, not in the Python output
 # all subsequent python output to webpage between TEST 2 (input) and TEST 12 (time.sleep) is not displayed until after the sleep completes
 
@@ -77,9 +77,15 @@ def set_global():
     global_var = 1
 set_global()
 print(f"Global var: {global_var}")
-# TODO: address unexpected behavior
-# global variable is not update-able from within the funciton
-# when printed, it remains unchanged at 0
+# NOTE: In this environment, 'global' does not update the true module/global scope because the code is wrapped in an async function.
+# As a result, global_var remains 0. This is a limitation of how code is executed in Pyodide/async JS wrappers.
+# Workaround: Use a mutable object (like a dict or class instance) to hold shared state, e.g.:
+# state = {'global_var': 0}
+# def set_global():
+#     state['global_var'] = 1
+# set_global()
+# print(f"Global var: {state['global_var']}")
+# TODO: explore this further
 
 print("[TEST 15] Use exit() (commented out)")
 # exit()
