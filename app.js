@@ -16,6 +16,8 @@ const pythonVersion = document.getElementById('python-version');
 
 // Import from the transformInputToAsync module
 import { transformPythonForPyodide } from './transformInputToAsync.js';
+// Import from the concatenatePrints module
+import { concatenateConsecutivePrints } from './concatenatePrints.js';
 
 // Initialize Pyodide
 async function initializePyodide() {
@@ -99,8 +101,11 @@ async function loadPythonProgram() {
         if (response.ok) {
             let rawCode = await response.text();
             // Transform the code to async/await style
-            pythonProgram = transformPythonForPyodide(rawCode);
-            console.log(`Loaded and transformed ${filename} successfully:\n${pythonProgram}`);
+            let transformedCode = transformPythonForPyodide(rawCode);
+            console.log(`Loaded and transformed ${filename} successfully:\n${transformedCode}`);
+            // Further optimize by concatenating consecutive print statements
+            pythonProgram = concatenateConsecutivePrints(transformedCode);
+            console.log(`Concatenate consecutive print statements successfully:\n${pythonProgram}`);
         } else {
             throw new Error(`HTTP ${response.status}`);
         }
