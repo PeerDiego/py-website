@@ -213,5 +213,5 @@ def game_over():
     ])
     await choice()
 
-# if __name__ == "__main__": # need to remove this line for Pyodide compatibility
-title_screen()
+if __name__ == "__main__": # need to remove this line for Pyodide compatibility
+    title_screen()

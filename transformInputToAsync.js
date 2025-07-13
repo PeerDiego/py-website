@@ -211,17 +211,21 @@ function transformMainBlock(code) {
     const lines = code.split(/\r?\n/);
     const transformedLines = [];
     let inMainBlock = false;
+    let inElifElseBlock = false;
     let mainBlockIndent = '';
     
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         const mainBlockMatch = line.match(/^(\s*)if\s+__name__\s*==\s*["']__main__["']\s*:/);
+        const lineContent = line.trim();
+        const currentIndent = line.match(/^(\s*)/)[1];
         
         if (mainBlockMatch) {
             // Found the main block, comment it out and add explanation
             debug(MODULE_NAME, `Found __main__ block at line ${i + 1}`);
             mainBlockIndent = mainBlockMatch[1];
             inMainBlock = true;
+            inElifElseBlock = false;
             transformedLines.push(mainBlockIndent + '# The following code was originally in a __main__ block but has been');
             transformedLines.push(mainBlockIndent + '# moved to the global scope for compatibility with Pyodide');
             transformedLines.push(mainBlockIndent + '#' + line.slice(mainBlockIndent.length));
@@ -229,30 +233,42 @@ function transformMainBlock(code) {
         }
         
         if (inMainBlock) {
-            const lineContent = line.trim();
+            if (lineContent === '') {
+                // Preserve empty lines as-is
+                transformedLines.push('');
+                continue;
+            }
+            
+            // Check if we're starting an elif/else block
             if (lineContent.startsWith('elif ') || lineContent.startsWith('else:')) {
-                // Comment out elif/else clauses
+                inElifElseBlock = true;
                 debug(MODULE_NAME, `Commenting out elif/else at line ${i + 1}`);
-                transformedLines.push(line.replace(/^(\s*)/, '$1#'));
+                transformedLines.push(mainBlockIndent + '#' + line.slice(mainBlockIndent.length));
                 continue;
             }
             
-            if (line.trim() === '') {
-                // Preserve empty lines
-                transformedLines.push(line);
-                continue;
-            }
-            
-            const currentIndent = line.match(/^(\s*)/)[1];
-            if (currentIndent.length > mainBlockIndent.length) {
-                // This line is part of the main block - un-indent it
-                const unindented = line.slice(mainBlockIndent.length);
-                debug(MODULE_NAME, `Un-indenting line ${i + 1}`);
-                transformedLines.push(unindented);
-            } else {
-                // No longer in the main block
+            // Check if we're leaving the main block
+            if (currentIndent.length < mainBlockIndent.length) {
                 inMainBlock = false;
+                inElifElseBlock = false;
                 transformedLines.push(line);
+                continue;
+            }
+            
+            // Handle content within the main block
+            if (inElifElseBlock) {
+                // Comment out everything in elif/else blocks
+                transformedLines.push(mainBlockIndent + '#' + line.slice(mainBlockIndent.length));
+            } else {
+                // For content in the main 'if' block:
+                // First get the current line's indentation relative to the if __name__ block
+                const relativeIndent = currentIndent.slice(mainBlockIndent.length);
+                // The content should be at the same level as its if __name__ block, so:
+                // 1. Keep the original if __name__ indentation (mainBlockIndent)
+                // 2. Remove one level of nesting from the relative indent (the if block's indent)
+                const finalIndent = mainBlockIndent + (relativeIndent.length >= 4 ? relativeIndent.slice(4) : '');
+                transformedLines.push(finalIndent + lineContent);
+                debug(MODULE_NAME, `Un-indenting line ${i + 1} from '${line}' to '${finalIndent + lineContent}'`);
             }
         } else {
             transformedLines.push(line);
@@ -332,6 +348,10 @@ function transformPythonForPyodide(code) {
     if (iteration >= maxIterations) {
         debug(MODULE_NAME, '⚠️ Warning: Maximum iterations reached. Transformation may be incomplete.');
     }
+    
+    // After all async transformations are done, handle the main block
+    debug(MODULE_NAME, '🔧 Transforming main block...');
+    currentCode = transformMainBlock(currentCode);
     
     debug(MODULE_NAME, `🏁 === transformPythonForPyodide END (${iteration} iterations) ===`);
     debug(MODULE_NAME, 'Final code length:', currentCode.length);

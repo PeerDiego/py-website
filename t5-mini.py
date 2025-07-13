@@ -82,5 +82,5 @@ def start_demo():
     print("\nDemo would start.")
     quit_demo()  # For now, just quit after starting
 
-# if __name__ == "__main__": # need to remove this line for Pyodide compatibility
-title_screen()
+if __name__ == "__main__": # need to remove this line for Pyodide compatibility
+    title_screen()

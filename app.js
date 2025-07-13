@@ -16,7 +16,7 @@ import { debug, setDebugModules } from './debugUtils.js';
 setDebugModules({
     'app.js': true,
     'concatenatePrints.js': false,
-    'transformInputToAsync.js': false
+    'transformInputToAsync.js': true
 });
 
 // DOM elements
