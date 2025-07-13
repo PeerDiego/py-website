@@ -7,20 +7,22 @@ import time
 import sys
 
 def pause(prompt="Press Enter to continue..."):
-    input(f"\n{prompt}")
+    input(prompt)
+    # Unused for website version
     # Move cursor up and clear the line
-    sys.stdout.write("\033[F")
-    sys.stdout.write(" " * len(prompt) + "\r")
-    sys.stdout.flush()
+    # sys.stdout.write("\033[F")
+    # sys.stdout.write(" " * len(prompt) + "\r")
+    # sys.stdout.flush()
 
 def wait(s=2.0):
     time.sleep(s)
-    print()
+    # print()
 
 def menu(title, options):
-    print(f"\n{title}")
+    menu_text = f"\n{title}"
     for i, (label, _) in enumerate(options, 1):
-        print(f"  {i}. {label}")
+        menu_text += f"\n  {i}. {label}"
+    print(menu_text, "\n\n")
     while True:
         try:
             choice = int(input("Choose: "))
@@ -31,9 +33,14 @@ def menu(title, options):
         print("Invalid choice. Try again.")
 
 # Demo game state
-snooze_count = 0
-pants_wet = False
-has_money = False
+# This allows us to maintain state across different functions without needing to declare them as global.
+# This is a workaround for the limitations of Pyodide's handling of global variables.
+state = {
+    "running": True,
+    "snooze_count": 0,
+    "pants_wet": False,
+    "has_money": False,
+}
 
 def title_screen():
     print("\n" + "="*50)
@@ -48,13 +55,16 @@ def title_screen():
     main_menu()
 
 def main_menu():
-    while True:
+    while state["running"]:
         choice = menu("-----MONDAY DEMO-----", [
             ("START DEMO", start_demo),
             ("ABOUT", about_demo),
             ("QUIT", quit_demo)
         ])
-        choice()
+        # unfortunately there seems no way simple enough to programmatically convert
+        # this to async/await in Pyodide, so we just prepend `await` for select functions
+        # y'know what, let's just make everything async for consistency...
+        await choice()
 
 def about_demo():
     print("\nThis is a demo of MONDAY, a text adventure game.")
@@ -67,7 +77,9 @@ def about_demo():
 def quit_demo():
     print("\nThanks for trying the MONDAY demo!")
     print("Remember: Monday has claimed another victim!")
-    exit()
+    state["running"] = False
+    wait(1)
+    return
 
 def start_demo():
     print("\nYOU'RE IN BED, ASLEEP.")
@@ -82,19 +94,17 @@ def start_demo():
     wakeup_menu()
 
 def wakeup_menu():
-    global snooze_count
     while True:
         choice = menu("  YOU WAKE UP   ", [
             ("SNOOZE", snooze),
             ("GET UP", get_up),
             ("SMASH STEREO", smash_stereo)
         ])
-        if choice():
+        if await choice():
             break
 
 def snooze():
-    global snooze_count
-    if snooze_count == 2:
+    if state["snooze_count"] == 2:
         print("YOU'VE OVERSLEPT!")
         print("YOU MISS YOUR BUS AND TRY TO WALK TO SCHOOL.")
         print("OF COURSE YOU DON'T MAKE IT!")
@@ -103,8 +113,8 @@ def snooze():
         return True
     print("ZZZZZ...")
     pause()
-    snooze_count += 1
-    print(f"(You've hit snooze {snooze_count} time(s))")
+    state["snooze_count"] += 1
+    print(f"(You've hit snooze {state['snooze_count']} time(s))")
     return False
 
 def smash_stereo():
@@ -132,12 +142,12 @@ def bathroom_menu():
         ("RELIEVE SELF", relieve_self), 
         ("HOLD IT IN", hold_it_in)
     ])
-    choice()
+    # Both relieve_self and hold_it_in need async
+    await choice()
 
 def hold_it_in():
-    global pants_wet
     print("YOU WET YOUR PANTS.")
-    pants_wet = True
+    state["pants_wet"] = True
     pause()
     ed_mcmahon()
 
@@ -147,13 +157,12 @@ def relieve_self():
     ed_mcmahon()
 
 def ed_mcmahon():
-    global has_money, pants_wet
-    if not pants_wet:
+    if not state["pants_wet"]:
         print("ED MCMAHON SHOWS UP AT YOUR DOOR!")
         print("HE SAYS YOU'VE WON 10 MILLION BUCKS!")
         print("WHOO-HOO!")
         print("YOU STUFF THE ENTIRE 10 MILLION BUCKS IN YOUR POCKET.")
-        has_money = True
+        state["has_money"] = True
         pause()
         breakfast_demo()
     else:
@@ -187,7 +196,7 @@ def breakfast_demo():
         ("MAIN MENU", main_menu),
         ("QUIT", quit_demo)
     ])
-    choice()
+    await choice()
 
 def game_over():
     print("\n" + "="*30)
@@ -202,7 +211,7 @@ def game_over():
         ("MAIN MENU", main_menu),
         ("QUIT", quit_demo)
     ])
-    choice()
+    await choice()
 
-if __name__ == "__main__":
-    title_screen()
+# if __name__ == "__main__": # need to remove this line for Pyodide compatibility
+title_screen()

@@ -3,13 +3,13 @@ print("[TEST 1] Input statement")
 user_input = input("Enter something: ")
 print(f"You entered: {user_input}")
 
-print("[TEST 2] Await outside async function scenario")
+print("[TEST 2] Input statement in a function")
 def input_func():
     bla = input("Enter something else: ")
     print(f"You entered: {bla}")
 input_func()
 
-print("[TEST 3] Await outside async function scenario returning input()")
+print("[TEST 3] Function returning input() result")
 def input_func_return():
     return input("Enter yet something else: ")
 xyz = input_func_return()

@@ -2,6 +2,9 @@
 // Node.js script to transform Python functions using input() to async/await style
 // Usage: node transformInputToAsync.js <python_file.py>
 
+import { debug } from './debugUtils.js';
+const MODULE_NAME = 'transformInputToAsync.js';
+
 let fs, path, fileURLToPath;
 if (typeof process !== 'undefined' && process.versions && process.versions.node) {
     // We're in Node.js
@@ -14,13 +17,18 @@ if (typeof process !== 'undefined' && process.versions && process.versions.node)
 }
 
 function findFunctionsWithInputOrSleep(code) {
+    debug(MODULE_NAME, '=== findFunctionsWithInputOrSleep START ===');
     const lines = code.split(/\r?\n/);
+    debug(MODULE_NAME, `Processing ${lines.length} lines of code`);
     const functionRegex = /^([ \t]*)def\s+(\w+)\s*\([^)]*\):/;
     const results = [];
+    
     for (let i = 0; i < lines.length; i++) {
         const match = lines[i].match(functionRegex);
         if (match) {
             const [_, indent, name] = match;
+            debug(MODULE_NAME, `Found function '${name}' at line ${i + 1} with indent '${indent}'`);
+            
             // Collect the function body (naive: until next non-indented line or EOF)
             let bodyLines = [];
             let j = i + 1;
@@ -29,22 +37,36 @@ function findFunctionsWithInputOrSleep(code) {
                 j++;
             }
             const bodyNoComments = bodyLines.join('\n').replace(/#.*$/gm, '');
+            debug(MODULE_NAME, `Function '${name}' body has ${bodyLines.length} lines`);
+            
             // Check for both input() and time.sleep()
-            if (/\binput\s*\(/.test(bodyNoComments) || /\btime\.sleep\s*\(/.test(bodyNoComments)) {
+            const hasInput = /\binput\s*\(/.test(bodyNoComments);
+            const hasSleep = /\btime\.sleep\s*\(/.test(bodyNoComments);
+            debug(MODULE_NAME, `Function '${name}': hasInput=${hasInput}, hasSleep=${hasSleep}`);
+            
+            if (hasInput || hasSleep) {
+                debug(MODULE_NAME, `✓ Adding function '${name}' to results (contains input() or time.sleep())`);
                 results.push({ name, line: i + 1 });
+            } else {
+                debug(MODULE_NAME, `✗ Skipping function '${name}' (no input() or time.sleep())`);
             }
         }
     }
+    
+    debug(MODULE_NAME, `=== findFunctionsWithInputOrSleep END: Found ${results.length} functions ===`);
     return results;
 }
 
 function findFunctionCalls(code, functionNames) {
+    debug(MODULE_NAME, '=== findFunctionCalls START ===');
+    debug(MODULE_NAME, `Looking for calls to functions: ${functionNames.join(', ')}`);
     const lines = code.split(/\r?\n/);
     const calls = {};
     
     // Initialize all function names with empty arrays
     for (const name of functionNames) {
         calls[name] = [];
+        debug(MODULE_NAME, `Initialized call tracking for function '${name}'`);
     }
     
     lines.forEach((line, idx) => {
@@ -53,66 +75,268 @@ function findFunctionCalls(code, functionNames) {
             const callRegex = new RegExp(`(?<!def\\s+)\\b${name}\\s*\\(`, 'g');
             let match;
             while ((match = callRegex.exec(line)) !== null) {
+                debug(MODULE_NAME, `Found call to '${name}' at line ${idx + 1}: ${line.trim()}`);
                 calls[name].push({ line: idx + 1, text: line.trim() });
             }
         }
     });
     
+    debug(MODULE_NAME, '=== findFunctionCalls SUMMARY ===');
+    for (const [name, callList] of Object.entries(calls)) {
+        debug(MODULE_NAME, `Function '${name}': ${callList.length} calls found`);
+    }
+    debug(MODULE_NAME, '=== findFunctionCalls END ===');
+    
     return calls;
 }
 
 function transformPythonCode(code, functionInfos, calls) {
+    debug(MODULE_NAME, '=== transformPythonCode START ===');
+    debug(MODULE_NAME, `Transforming code with ${functionInfos.length} async functions`);
+    
     // functionInfos: [{ name, line }]
     let lines = code.split(/\r?\n/);
+    debug(MODULE_NAME, `Code has ${lines.length} lines`);
     
     // Insert 'async' before 'def' for each function definition line
+    debug(MODULE_NAME, '--- Adding async keywords to function definitions ---');
     for (const fn of functionInfos) {
         const idx = fn.line - 1;
         if (idx >= 0 && idx < lines.length && !/^\s*async\s+def\b/.test(lines[idx])) {
+            const oldLine = lines[idx];
             lines[idx] = lines[idx].replace(/^(\s*)def\b/, '$1async def');
+            debug(MODULE_NAME, `Line ${fn.line}: '${oldLine}' → '${lines[idx]}'`);
+        } else {
+            debug(MODULE_NAME, `Skipping line ${fn.line}: already async or invalid index`);
         }
     }
     
     // Now add 'await' to function calls
+    debug(MODULE_NAME, '--- Adding await to function calls ---');
     for (const fn of functionInfos) {
         const fnEscaped = fn.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         // Check if calls[fn.name] exists and has elements
         if (calls[fn.name] && calls[fn.name].length > 0) {
+            debug(MODULE_NAME, `Processing ${calls[fn.name].length} calls to function '${fn.name}'`);
             for (const call of calls[fn.name]) {
                 const idx = call.line - 1;
                 if (idx >= 0 && idx < lines.length && !/\bawait\s+/.test(lines[idx])) {
+                    const oldLine = lines[idx];
                     lines[idx] = lines[idx].replace(new RegExp(`\\b${fnEscaped}\\s*\\(`), `await ${fn.name}(`);
+                    debug(MODULE_NAME, `Line ${call.line}: '${oldLine}' → '${lines[idx]}'`);
+                } else {
+                    debug(MODULE_NAME, `Skipping call at line ${call.line}: already has await or invalid`);
                 }
             }
+        } else {
+            debug(MODULE_NAME, `No calls found for function '${fn.name}'`);
         }
     }
     
     // Transform all input() calls to await input() calls
-    // This handles input() calls that aren't inside async functions
+    debug(MODULE_NAME, '--- Adding await to input() calls ---');
+    let inputTransforms = 0;
     for (let i = 0; i < lines.length; i++) {
         // Only add await if it's not already there
         if (/\binput\s*\(/.test(lines[i]) && !/\bawait\s+input\s*\(/.test(lines[i])) {
+            const oldLine = lines[i];
             lines[i] = lines[i].replace(/\binput\s*\(/g, 'await input(');
+            debug(MODULE_NAME, `Line ${i + 1}: '${oldLine}' → '${lines[i]}'`);
+            inputTransforms++;
         }
     }
+    debug(MODULE_NAME, `Applied await to ${inputTransforms} input() calls`);
     
     // Also transform time.sleep() calls to await time.sleep() calls
+    debug(MODULE_NAME, '--- Adding await to time.sleep() calls ---');
+    let sleepTransforms = 0;
     for (let i = 0; i < lines.length; i++) {
         // Only add await if it's not already there
         if (/\btime\.sleep\s*\(/.test(lines[i]) && !/\bawait\s+time\.sleep\s*\(/.test(lines[i])) {
+            const oldLine = lines[i];
             lines[i] = lines[i].replace(/\btime\.sleep\s*\(/g, 'await time.sleep(');
+            debug(MODULE_NAME, `Line ${i + 1}: '${oldLine}' → '${lines[i]}'`);
+            sleepTransforms++;
         }
     }
+    debug(MODULE_NAME, `Applied await to ${sleepTransforms} time.sleep() calls`);
     
+    debug(MODULE_NAME, '=== transformPythonCode END ===');
     return lines.join('\n');
 }
 
-// Main function to transform Python code for Pyodide compatibility
+// Helper function to find functions that contain await calls
+function findFunctionsWithAwait(code) {
+    debug(MODULE_NAME, '=== findFunctionsWithAwait START ===');
+    const lines = code.split(/\r?\n/);
+    const functionRegex = /^([ \t]*)def\s+(\w+)\s*\([^)]*\):/;
+    const results = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+        const match = lines[i].match(functionRegex);
+        if (match) {
+            const [_, indent, name] = match;
+            debug(MODULE_NAME, `Checking function '${name}' at line ${i + 1} for await calls`);
+            
+            // Collect the function body (naive: until next non-indented line or EOF)
+            let bodyLines = [];
+            let j = i + 1;
+            while (j < lines.length && (/^\s/.test(lines[j]) || lines[j].trim() === '')) {
+                bodyLines.push(lines[j]);
+                j++;
+            }
+            const bodyNoComments = bodyLines.join('\n').replace(/#.*$/gm, '');
+            debug(MODULE_NAME, `Function '${name}' body has ${bodyLines.length} lines`);
+            
+            // Check for await calls
+            const hasAwait = /\bawait\s+/.test(bodyNoComments);
+            debug(MODULE_NAME, `Function '${name}': hasAwait=${hasAwait}`);
+            
+            if (hasAwait) {
+                debug(MODULE_NAME, `✓ Adding function '${name}' to results (contains await)`);
+                results.push({ name, line: i + 1 });
+            } else {
+                debug(MODULE_NAME, `✗ Skipping function '${name}' (no await calls)`);
+            }
+        }
+    }
+    
+    debug(MODULE_NAME, `=== findFunctionsWithAwait END: Found ${results.length} functions ===`);
+    return results;
+}
+
+// Helper function to transform if __name__ == "__main__" block
+function transformMainBlock(code) {
+    debug(MODULE_NAME, '=== transformMainBlock START ===');
+    const lines = code.split(/\r?\n/);
+    const transformedLines = [];
+    let inMainBlock = false;
+    let mainBlockIndent = '';
+    
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const mainBlockMatch = line.match(/^(\s*)if\s+__name__\s*==\s*["']__main__["']\s*:/);
+        
+        if (mainBlockMatch) {
+            // Found the main block, comment it out and add explanation
+            debug(MODULE_NAME, `Found __main__ block at line ${i + 1}`);
+            mainBlockIndent = mainBlockMatch[1];
+            inMainBlock = true;
+            transformedLines.push(mainBlockIndent + '# The following code was originally in a __main__ block but has been');
+            transformedLines.push(mainBlockIndent + '# moved to the global scope for compatibility with Pyodide');
+            transformedLines.push(mainBlockIndent + '#' + line.slice(mainBlockIndent.length));
+            continue;
+        }
+        
+        if (inMainBlock) {
+            const lineContent = line.trim();
+            if (lineContent.startsWith('elif ') || lineContent.startsWith('else:')) {
+                // Comment out elif/else clauses
+                debug(MODULE_NAME, `Commenting out elif/else at line ${i + 1}`);
+                transformedLines.push(line.replace(/^(\s*)/, '$1#'));
+                continue;
+            }
+            
+            if (line.trim() === '') {
+                // Preserve empty lines
+                transformedLines.push(line);
+                continue;
+            }
+            
+            const currentIndent = line.match(/^(\s*)/)[1];
+            if (currentIndent.length > mainBlockIndent.length) {
+                // This line is part of the main block - un-indent it
+                const unindented = line.slice(mainBlockIndent.length);
+                debug(MODULE_NAME, `Un-indenting line ${i + 1}`);
+                transformedLines.push(unindented);
+            } else {
+                // No longer in the main block
+                inMainBlock = false;
+                transformedLines.push(line);
+            }
+        } else {
+            transformedLines.push(line);
+        }
+    }
+    
+    debug(MODULE_NAME, '=== transformMainBlock END ===');
+    return transformedLines.join('\n');
+}
+
+// Main function to transform Python code for Pyodide compatibility with recursive async propagation
 function transformPythonForPyodide(code) {
-    const foundFunctions = findFunctionsWithInputOrSleep(code);
-    const functionNames = foundFunctions.map(f => f.name);
-    const calls = findFunctionCalls(code, functionNames);
-    return transformPythonCode(code, foundFunctions, calls);
+    debug(MODULE_NAME, '🚀 === transformPythonForPyodide START ===');
+    debug(MODULE_NAME, 'Input code length:', code.length);
+    
+    let currentCode = code;
+    let previousAsyncFunctions = new Set();
+    let maxIterations = 10; // Prevent infinite loops
+    let iteration = 0;
+    
+    // Always run at least one iteration to handle top-level input() and time.sleep() calls
+    do {
+        iteration++;
+        debug(MODULE_NAME, `\n🔄 === Iteration ${iteration} ===`);
+        
+        // Find functions with input() or time.sleep() (base case)
+        const foundFunctions = findFunctionsWithInputOrSleep(currentCode);
+        debug(MODULE_NAME, `Found ${foundFunctions.length} functions with input()/time.sleep()`);
+        
+        // Find functions that contain await calls (cascading case)
+        const awaitFunctions = findFunctionsWithAwait(currentCode);
+        debug(MODULE_NAME, `Found ${awaitFunctions.length} functions with await calls`);
+        
+        // Combine both sets of functions that need to be async
+        const allAsyncFunctions = [...foundFunctions, ...awaitFunctions];
+        debug(MODULE_NAME, `Total potential async functions: ${allAsyncFunctions.length}`);
+        
+        // Remove duplicates
+        const uniqueAsyncFunctions = allAsyncFunctions.filter((fn, index, self) => 
+            index === self.findIndex(f => f.name === fn.name)
+        );
+        debug(MODULE_NAME, `Unique async functions after deduplication: ${uniqueAsyncFunctions.length}`);
+        
+        const currentAsyncFunctions = new Set(uniqueAsyncFunctions.map(f => f.name));
+        
+        debug(MODULE_NAME, 'Functions needing async:', Array.from(currentAsyncFunctions));
+        debug(MODULE_NAME, 'Previous async functions:', Array.from(previousAsyncFunctions));
+        
+        // Find all calls to async functions
+        const functionNames = uniqueAsyncFunctions.map(f => f.name);
+        const calls = findFunctionCalls(currentCode, functionNames);
+        
+        // Transform the code (this will always run at least once, handling top-level calls)
+        debug(MODULE_NAME, '🔧 Starting code transformation...');
+        const beforeTransform = currentCode.length;
+        currentCode = transformPythonCode(currentCode, uniqueAsyncFunctions, calls);
+        const afterTransform = currentCode.length;
+        debug(MODULE_NAME, `Code length: ${beforeTransform} → ${afterTransform}`);
+        
+        // If no new async functions were found, we're done
+        const noNewFunctions = currentAsyncFunctions.size === previousAsyncFunctions.size && 
+            [...currentAsyncFunctions].every(fn => previousAsyncFunctions.has(fn));
+        
+        debug(MODULE_NAME, `No new async functions found: ${noNewFunctions}`);
+        
+        if (noNewFunctions) {
+            debug(MODULE_NAME, '✅ No new async functions found. Transformation complete.');
+            break;
+        }
+        
+        // Update the set of async functions for next iteration
+        previousAsyncFunctions = new Set(currentAsyncFunctions);
+        debug(MODULE_NAME, `Updated previous async functions for next iteration: ${Array.from(previousAsyncFunctions)}`);
+        
+    } while (iteration < maxIterations);
+    
+    if (iteration >= maxIterations) {
+        debug(MODULE_NAME, '⚠️ Warning: Maximum iterations reached. Transformation may be incomplete.');
+    }
+    
+    debug(MODULE_NAME, `🏁 === transformPythonForPyodide END (${iteration} iterations) ===`);
+    debug(MODULE_NAME, 'Final code length:', currentCode.length);
+    
+    return currentCode;
 }
 
 // Export for use in other scripts using ES6 syntax. module.exports = { ... }; won't work
@@ -129,9 +353,9 @@ if (typeof process !== 'undefined' && process.versions && process.versions.node)
             try {
                 const filePath = path.resolve(process.cwd(), filename);
                 pythonCode = fs.readFileSync(filePath, 'utf8');
-                console.log(`Loaded Python code from: ${filePath}`);
+                debug(MODULE_NAME, `Loaded Python code from: ${filePath}`);
             } catch (err) {
-                console.error(`Error reading file '${filename}':`, err.message);
+                debug(MODULE_NAME, `Error reading file '${filename}':`, err.message);
                 process.exit(1);
             }
         } else {
@@ -169,37 +393,46 @@ bar()
 foo()
 qux()`;
         }
+
+        debug(MODULE_NAME, '\n' + '='.repeat(80));
+        debug(MODULE_NAME, '=== Original Code ===');
+        debug(MODULE_NAME, '='.repeat(80));
+        debug(MODULE_NAME, pythonCode);
         
-        console.log('=== Original Code ===');
-        console.log(pythonCode);
-        console.log('\n=== Analysis ===');
+        // Always transform the code regardless of source
+        const transformed = transformPythonForPyodide(pythonCode);
+        
+        debug(MODULE_NAME, '\n' + '='.repeat(80));
+        debug(MODULE_NAME, '=== Transformed Code ===');
+        debug(MODULE_NAME, '='.repeat(80));
+        debug(MODULE_NAME, transformed);
+        
+        // Show detailed analysis after the transformed code
+        debug(MODULE_NAME, '\n' + '='.repeat(80));
+        debug(MODULE_NAME, '=== Detailed Analysis ===');
+        debug(MODULE_NAME, '='.repeat(80));
         
         const foundFunctions = findFunctionsWithInputOrSleep(pythonCode);
-        console.log('Functions containing input():', foundFunctions);
+        const functionNamesArray = foundFunctions.map(f => f.name);
+        const calls = findFunctionCalls(pythonCode, functionNamesArray);
         
         if (foundFunctions.length > 0) {
-            const functionNamesArray = foundFunctions.map(f => f.name);
-            const calls = findFunctionCalls(pythonCode, functionNamesArray);
+            debug(MODULE_NAME, '\nFunctions containing input() or time.sleep():', 
+                foundFunctions.map(f => f.name).join(', '));
             
-            console.log('\n=== Function Call Analysis ===');
+            debug(MODULE_NAME, '\nFunction Call Analysis:');
             for (const fn of foundFunctions) {
-                console.log(`\nCalls to function '${fn.name}':`);
+                debug(MODULE_NAME, `\nCalls to function '${fn.name}':`);
                 if (!calls[fn.name] || calls[fn.name].length === 0) {
-                    console.log('  (No calls found)');
+                    debug(MODULE_NAME, '  (No calls found)');
                 } else {
                     for (const call of calls[fn.name]) {
-                        console.log(`  Line ${call.line}: ${call.text}`);
+                        debug(MODULE_NAME, `  Line ${call.line}: ${call.text}`);
                     }
                 }
             }
-            
-            // const transformed = transformPythonCode(pythonCode, foundFunctions, calls);
-            // refactoring to this:
-            const transformed = transformPythonForPyodide(pythonCode);
-            console.log('\n=== Transformed Code ===');
-            console.log(transformed);
         } else {
-            console.log('No functions with input() found.');
+            debug(MODULE_NAME, 'No functions with input() or time.sleep() found.');
         }
     }
 }

@@ -5,6 +5,20 @@ let pythonProgram = '';
 let isWaitingForInput = false;
 let inputResolver = null;
 
+// Import from the transformInputToAsync module
+import { transformPythonForPyodide } from './transformInputToAsync.js';
+// Import from the concatenatePrints module
+import { concatenateConsecutivePrints } from './concatenatePrints.js';
+// Import debug utilities
+import { debug, setDebugModules } from './debugUtils.js';
+
+// Configure which modules should show debug output
+setDebugModules({
+    'app.js': true,
+    'concatenatePrints.js': false,
+    'transformInputToAsync.js': false
+});
+
 // DOM elements
 const chatOutput = document.getElementById('chat-output');
 const userInput = document.getElementById('user-input');
@@ -13,9 +27,6 @@ const runScriptButton = document.getElementById('run-script-button');
 const clearButton = document.getElementById('clear-button');
 const status = document.getElementById('status');
 const pythonVersion = document.getElementById('python-version');
-
-// Import from the transformInputToAsync module
-import { transformPythonForPyodide } from './transformInputToAsync.js';
 
 // Initialize Pyodide
 async function initializePyodide() {
@@ -99,8 +110,12 @@ async function loadPythonProgram() {
         if (response.ok) {
             let rawCode = await response.text();
             // Transform the code to async/await style
-            pythonProgram = transformPythonForPyodide(rawCode);
-            console.log(`Loaded and transformed ${filename} successfully:\n${pythonProgram}`);
+            let transformedCode = transformPythonForPyodide(rawCode);
+            console.log(`Loaded and transformed ${filename} successfully.`);
+            debug('app.js', transformedCode);
+            // Further optimize by concatenating consecutive print statements
+            pythonProgram = concatenateConsecutivePrints(transformedCode);
+            debug('app.js', `Concatenate consecutive print statements successfully:\n${pythonProgram}`);
         } else {
             throw new Error(`HTTP ${response.status}`);
         }
@@ -152,7 +167,7 @@ function getUserInput(prompt) {
         
         // Add the prompt message to the chat
         if (prompt && prompt.trim()) {
-            addMessage('python', prompt);
+            addMessage('system', prompt);
         }
         
         // Set up the input waiting state
@@ -163,7 +178,7 @@ function getUserInput(prompt) {
         
         // Set up the callback for when user submits input
         inputResolver = (value) => {
-            console.log('Input received:', value);
+            console.log('Input received:', value || "(empty input)");
             isWaitingForInput = false;
             userInput.placeholder = 'Type a message...';
             inputResolver = null;
@@ -205,7 +220,7 @@ function handleUserInput() {
     
     // Only proceed if we're waiting for input from Python
     if (isWaitingForInput && inputResolver) {
-        addMessage('user', input || "(empty input)");
+        if (input) addMessage('user', input);
         userInput.value = '';
         inputResolver(input);
         return;
