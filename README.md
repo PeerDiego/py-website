@@ -53,16 +53,30 @@ This is a simple demonstration program that shows how Python `input()` and `prin
 Edit `main.py` to create your own interactive program:
 
 ```python
-# Your custom Python program
-print("Welcome to my custom program!")
+# Simple Interactive Python Program
+print("🎉 Welcome to the Interactive Python Chat!")
 
 name = input("What's your name? ")
-print(f"Hello, {name}!")
+print(f"Hello, {name.title()}! Nice to meet you! 👋")
+
+# Demonstration of time.sleep()
+time.sleep(3)
 
 age = input("How old are you? ")
-print(f"You are {age} years old.")
+try:
+    age_int = int(age)
+    if age_int < 13:
+        print("You're a kid! Enjoy your childhood.")
+    elif 13 <= age_int < 20:
+        print("You're a teenager! Exciting times ahead.")
+    elif 20 <= age_int < 65:
+        print("You're an adult! Keep striving for your goals.")
+    else:
+        print("You're a senior! Wisdom comes with age.")
+except ValueError:
+    print("That doesn't seem to be a valid age.")
 
-# Add your own logic here...
+print("This demonstrates Python input/output in the browser.")
 ```
 
 ## Example Interactions
@@ -74,9 +88,10 @@ The chat interface will show:
 🤖 Python: What's your name?
 👤 User: Alice
 🤖 Python: Hello, Alice! Nice to meet you! 👋
+[3 second pause]
 🤖 Python: How old are you?
 👤 User: 25
-🤖 Python: You said you are 25 years old.
+🤖 Python: You're an adult! Keep striving for your goals.
 🤖 Python: This demonstrates Python input/output in the browser.
 ```
 
@@ -113,5 +128,34 @@ Since this is a pure client-side application, you can deploy it anywhere:
 - Interactive input/output works smoothly with the async implementation
 - Memory usage is reasonable for most applications
 - The chat interface remains responsive during Python execution
+
+## Python Code Compatibility
+
+When adapting Python code to run in the browser with Pyodide, there are several important considerations:
+
+### Async/Await Requirements
+
+- Any code that makes the program wait (input, sleep, pause) must use async/await
+- The system will automatically transform many common functions to async versions
+- Functions that call other async functions must also be async themselves
+
+### Global Variables
+
+- Global variables don't work reliably in the Pyodide environment
+- Use a dictionary to store state instead, for example:
+  ```python
+  state = {
+      "running": True,
+      "score": 0,
+      "player_name": ""
+  }
+  ```
+
+### Common Issues to Watch For
+
+- Don't use `exit()` or `sys.exit()` - they won't work properly in the browser
+  - Instead, use a return statement or set a state flag like `state["running"] = False`
+- The `if __name__ == "__main__":` block should be replaced with a regular function call
+- Console clearing commands (`cls`, `clear`) won't work in the browser environment
 
 Enjoy coding Python in the browser! 🐍✨
