@@ -25,19 +25,17 @@ except ImportError:
 
 def pause(prompt = "Press Enter to continue..."):
     # Print prompt, wait for Enter, then overwrite the prompt line with spaces
-    input("\n"+prompt)
-    # Move cursor up one line and clear it
-    sys.stdout.write("\033[F")  # Move cursor up one line
-    sys.stdout.write(" " * len(prompt) + "\r")  # Overwrite with spaces
-    sys.stdout.flush()
+    input(prompt)  # Removed the \n to keep the prompt on same line
+    # Move cursor up one line and clear it - not needed for web version
+    # sys.stdout.write("\033[F")  # Move cursor up one line
+    # sys.stdout.write(" " * len(prompt) + "\r")  # Overwrite with spaces
+    # sys.stdout.flush()
 
 def wait(s=2.0):
     time.sleep(s)
 
-# Game state variables
-LMNDY = [0, 0, 0]  # [times_run, times_won, times_good_endings]
-# This allows us to maintain state across different functions without needing to declare them as global.
-# This is a workaround for the limitations of Pyodide's handling of global variables.
+# Game state dictionary - maintains state across different functions
+# This is a workaround for the limitations of Pyodide's handling of global variables
 state = {
     "running"           : True,
     "snooze_count"      : 0,
@@ -45,6 +43,10 @@ state = {
     "cash"              : 0,
     "ti-83_confiscated" : False,  # True if confiscated, False if player has it
     "has_money"         : False,
+    # Statistics tracking (formerly LMNDY list)
+    "times_played"      : 0,  # Number of times game has been played
+    "times_won"         : 0,  # Number of times player has won
+    "times_good_ending" : 0,  # Number of times player got the good ending
 }
 
 def menu(title, options):
@@ -72,17 +74,21 @@ def get_fernet():
     key = hashlib.sha256(SECRET.encode()).digest()
     return Fernet(base64.urlsafe_b64encode(key))
 
-def save_lmndy():
+def save_stats():
     if not CRYPTO_AVAILABLE:
         return
     f = get_fernet()
-    data = ",".join(str(x) for x in LMNDY).encode()
+    stats = [
+        state["times_played"],
+        state["times_won"],
+        state["times_good_ending"]
+    ]
+    data = ",".join(str(x) for x in stats).encode()
     token = f.encrypt(data)
     with open(SAVE_FILE, "wb") as file:
         file.write(token)
 
-def load_lmndy():
-    global LMNDY
+def load_stats():
     if not CRYPTO_AVAILABLE or not os.path.exists(SAVE_FILE):
         return
     f = get_fernet()
@@ -90,9 +96,14 @@ def load_lmndy():
         with open(SAVE_FILE, "rb") as file:
             token = file.read()
         data = f.decrypt(token).decode()
-        LMNDY[:] = [int(x) for x in data.split(",")]
+        stats = [int(x) for x in data.split(",")]
+        state["times_played"] = stats[0]
+        state["times_won"] = stats[1]
+        state["times_good_ending"] = stats[2]
     except Exception:
-        LMNDY[:] = [0, 0, 0]
+        state["times_played"] = 0
+        state["times_won"] = 0
+        state["times_good_ending"] = 0
 
 def title_screen():
     print("\nA MODERN ADVENTURE OF EPIC PROPORTIONS")
@@ -117,18 +128,18 @@ def main_menu():
 def pointless_info():
     print("\nHERE'S SOME USELESS INFORMATION.")
     pause()
-    print(f"YOU HAVE PLAYED THIS GAME {LMNDY[0]} TIMES.")
+    print(f"YOU HAVE PLAYED THIS GAME {state['times_played']} TIMES.")
     pause()
-    print(f"YOU HAVE WON {LMNDY[1]} TIME(S).", 
-          " >_> <_<" if LMNDY[1] > LMNDY[0] else "")
+    print(f"YOU HAVE WON {state['times_won']} TIME(S).", 
+          " >_> <_<" if state['times_won'] > state['times_played'] else "")
     pause()
-    if LMNDY[2] > 0:
-        print(f"YOU HAVE ACTUALLY WON {LMNDY[2]} TIME(S).")
+    if state['times_good_ending'] > 0:
+        print(f"YOU HAVE ACTUALLY WON {state['times_good_ending']} TIME(S).")
         pause()
-    elif LMNDY[1] == 0:
+    elif state['times_won'] == 0:
         print("KEEP ON TRYING.")
         pause()
-    elif LMNDY[1] == 1:
+    elif state['times_won'] == 1:
         print("YOU'RE GETTING THE HANG OF IT.")
         pause()
     # Return to main menu
@@ -192,7 +203,6 @@ def about():
 
 def credits():
     import sys
-    import time
     import os
     credits_lines = ["",
         "                  CREDITS",
@@ -216,7 +226,7 @@ def credits():
         "                THE END?"
     ]
     # Number of lines to show at once (like a movie credits window)
-    window = 15
+    window = 20
     # Pad with empty lines at the top and bottom for effect
     pad = ["" for _ in range(window)]
     scroll_lines = pad + credits_lines + pad
@@ -230,19 +240,22 @@ def credits():
         for line in scroll_lines[i:i+window]:
             print(line)
         wait(0.9)
-    LMNDY[1] += 1
-    save_lmndy()
-    quit_game()
+    state["times_won"] += 1
+    save_stats()
+    # quit_game()
 
 def quit_game():
-    save_lmndy()
-    print("\n     LOSER\n   YOU DIDN'T\n EVEN START YET")
+    save_stats()
+    if state["times_played"] == 0:
+        print("\n     LOSER\n   YOU DIDN'T\n EVEN START YET")
+    else:
+        print("\nTHANKS FOR PLAYING MONDAY!")
     state["running"] = False
     wait(1)
     return
 
 def play_game():
-    LMNDY[0] += 1
+    state["times_played"] += 1
     print("YOU'RE IN BED, ASLEEP.")
     pause()
     print("IT'S 5:15 A.M.")
@@ -1287,18 +1300,18 @@ def final_dig():
     pause()
     print("      ROLL\n      THE\n    CREDITS!   ")
     wait()
-    LMNDY[2] += 1
+    state["times_good_ending"] += 1
     credits()
 
 def game_over():
-    save_lmndy()
+    save_stats()
     print("\n---GAME--OVER---\nMONDAY HAS CLAIMED ANOTHER VICTIM!\n\nTRY AGAIN!")
     pause()
     main_menu()
 
 # if __name__ == "__main__": # trying out copilot's solution to SyntaxError: 'await' outside async function
 def da_game():
-    load_lmndy()
+    load_stats()
     title_screen()
 
 da_game()
