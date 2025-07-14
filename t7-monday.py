@@ -33,13 +33,26 @@ def pause(prompt = "Press Enter to continue..."):
 
 def wait(s=2.0):
     time.sleep(s)
-    print()
+
+# Game state variables
+LMNDY = [0, 0, 0]  # [times_run, times_won, times_good_endings]
+# This allows us to maintain state across different functions without needing to declare them as global.
+# This is a workaround for the limitations of Pyodide's handling of global variables.
+state = {
+    "running"           : True,
+    "snooze_count"      : 0,
+    "pants_wet"         : False,
+    "cash"              : 0,
+    "ti-83_confiscated" : False,  # True if confiscated, False if player has it
+    "has_money"         : False,
+}
 
 def menu(title, options):
-    print(f"\n{title}")
+    menu_text = f"\n{title}"
     for i, (label, _) in enumerate(options, 1):
-        print(f"  {i}. {label}")
-    while True:
+        menu_text += f"\n  {i}. {label}"
+    print(menu_text, "\n\n")
+    while state["running"]:
         try:
             choice = int(input("Choose: "))
             if 1 <= choice <= len(options):
@@ -48,12 +61,6 @@ def menu(title, options):
             pass
         print("Invalid choice. Try again.")
 
-# Game state variables
-LMNDY = [0, 0, 0]  # [times_run, times_won, times_good_endings]
-S = 0  # Snooze counter
-P = 0  # Pants-wet flag
-C = 0  # Cash
-T = 0  # TI-83 confiscated flag
 
 SAVE_FILE = "monday_save.dat"
 SECRET = "monday_secret_key_2025"  # Change this to something unique for your game
@@ -95,7 +102,7 @@ def title_screen():
     main_menu()
 
 def main_menu():
-    while True:
+    while state["running"]:
         choice = menu("-----MONDAY-----", [
             ("PLAY GAME", play_game),
             ("BACKGROUND", background),
@@ -104,7 +111,8 @@ def main_menu():
             ("ABOUT", about),
             ("QUIT GAME", quit_game)
         ])
-        choice()
+        await choice()
+    print("Thanks for playing!")
 
 def pointless_info():
     print("\nHERE'S SOME USELESS INFORMATION.")
@@ -127,7 +135,7 @@ def pointless_info():
 
 def hints():
     choice = menu("  WANT A HINT?  ", [("YES", hint_yes), ("NO", main_menu)])
-    choice()
+    await choice()
 
 def hint_yes():
     print("KEEP THIS IN MIND:")
@@ -139,7 +147,7 @@ def hint_yes():
     print("  MUHUWAHAHAHA")
     pause()
     choice = menu("WANT MORE HINTS?", [("YEA", hint_loser), ("NOPE", main_menu)])
-    choice()
+    await choice()
 
 def hint_loser():
     print("LOSER.")
@@ -147,7 +155,7 @@ def hint_loser():
     # Return to main menu
 
 def background():
-    print()
+    # print()
     print("YOU ARE A HIGH SCHOOL STUDENT.")
     wait()
     print("AND IT IS THE WORST DAY OF THE WEEK.")
@@ -171,7 +179,7 @@ def background():
 
 def about():
     print("""
-^^o^^o^^o^^o^^o^^o MONDAY o^^o^^o^^o^^o^^o^^
+    ^o^^o^^o^^o^^o MONDAY o^^o^^o^^o^^o^^o^^
          ---------------------------
               A TEXT ADVENTURE
                 FOR THE TI-83
@@ -229,7 +237,9 @@ def credits():
 def quit_game():
     save_lmndy()
     print("\n     LOSER\n   YOU DIDN'T\n EVEN START YET")
-    exit()
+    state["running"] = False
+    wait(1)
+    return
 
 def play_game():
     LMNDY[0] += 1
@@ -244,25 +254,23 @@ def play_game():
     wakeup_menu()
 
 def wakeup_menu():
-    global S
     while True:
         choice = menu("  YOU WAKE UP   ", [
             ("SNOOZE", snooze),
             ("GET UP", get_up),
             ("SMASH STEREO", smash_stereo)
         ])
-        if choice():
+        if await choice():
             break
 
 def snooze():
-    global S
-    if S == 2:
+    if state["snooze_count"] == 2:
         print("YOU'VE OVERSLEPT\nYOU MISS YOUR BUS AND YOU TRY TO WALK TO SCHOOL.\nOF COURSE YOU DON'T MAKE IT!\nWHAT KIND OF GAME DO YOU THINK THIS IS?!?")
         game_over()
         return True
     print("ZZZZZ...")
     pause()
-    S += 1
+    state["snooze_count"] += 1
     return False
 
 def smash_stereo():
@@ -278,12 +286,11 @@ def get_up():
 
 def bathroom_menu():
     choice = menu("   DO YOU GO?   ", [("RELIEVE SELF", relieve_self), ("HOLD IT IN", hold_it_in)])
-    choice()
+    await choice()
 
 def hold_it_in():
-    global P
     print("YOU WET YOUR PANTS.")
-    P = 1
+    state["pants_wet"] = True
     pause()
     ed_mcmahon()
 
@@ -293,10 +300,9 @@ def relieve_self():
     ed_mcmahon()
 
 def ed_mcmahon():
-    global C
-    if P == 0:
+    if not state["pants_wet"]:
         print("ED MCMAHON SHOWS UP AT YOUR DOOR TO SAY THAT YOU'VE WON 10 MILLION BUCKS. WHOO-HOO! YOU STUFF THE ENTIRE 10 MILLION BUCKS IN YOUR POCKET.")
-        C = 10000000
+        state["cash"] = 10000000
         pause()
         breakfast_menu()
     else:
@@ -306,7 +312,7 @@ def ed_mcmahon():
 
 def breakfast_menu():
     choice = menu("   NOW WHAT?    ", [("EAT BREAKFAST", eat_breakfast), ("WASH HANDS", wash_hands), ("GO TO BUS STOP", skip_breakfast)])
-    choice()
+    await choice()
 
 def eat_breakfast():
     print("YOU DIDN'T WASH YOUR HANDS. THAT'S SICK! THE GERMS EVENTUALLY OVERRUN YOU.")
@@ -328,7 +334,7 @@ def after_wash():
 
 def food_menu():
     choice = menu("    EAT WHAT?   ", [("POP-TART", poptart), ("FROZEN PIZZA", frozen_pizza), ("CEREAL", cereal)])
-    choice()
+    await choice()
 
 def poptart():
     print("IT IS STUCK IN THE TOASTER SO YOU TRY TO PRY IT OUT WITH A FORK. METAL CONDUCTS ELECTRICITY, FOOL!")
@@ -345,7 +351,7 @@ def cereal():
 
 def pack_bag_menu():
     choice = menu("   NOW WHAT?    ", [("PACK BAG", pack_bag), ("BRUSH TEETH", brush_teeth)])
-    choice()
+    await choice()
 
 def pack_bag():
     print("DISGUSTING! YOU DIDN'T BRUSH YOUR TEETH!")
@@ -358,7 +364,7 @@ def brush_teeth():
 
 def after_brush():
     choice = menu("    AND NOW?    ", [("PACK BAG", pack_bag2), ("LEAVE FOR BUS", leave_for_bus)])
-    choice()
+    await choice()
 
 def pack_bag2():
     print("DON'T FORGET YOUR TI-83, GAMEBOY AND CD PLAYER. ONLY WHAT'S NECESSARY.")
@@ -371,11 +377,11 @@ def leave_for_bus():
 
 def bus_menu():
     choice = menu("   PACKED BAG   ", [("GO TO BUS STOP", get_to_bus_stop), ("BACK TO BED", back_to_bed)])
-    choice()
+    await choice()
 
 def get_to_bus_stop():
     choice = menu("HOW TO GET THERE", [("WALK", walk_to_bus), ("RUN", run_to_bus)])
-    choice()
+    await choice()
 
 def back_to_bed():
     print("YOU GO BACK TO YOUR ROOM. THERE IS A PSYCHO WAITING FOR YOU... WEARING A MONICA LEWENSKI MASK...")
@@ -392,7 +398,7 @@ def run_to_bus():
 
 def at_bus_stop():
     choice = menu("AT THE BUS STOP ", [("SIT", sit_at_bus), ("STAND", stand_at_bus)])
-    choice()
+    await choice()
 
 def sit_at_bus():
     print("A CAR RUNS YOU DOWN. WHY? YOU SAT IN THE CEMENT THAT SOME JOKER LEFT AND YOU WERE UNABLE TO AVOID A CAR DRIVING ON THE SIDEWALK.")
@@ -407,7 +413,7 @@ def bus_arrives():
     print("THE BUS COMES.")
     pause()
     choice = menu("  IT'S WAITING  ", [("GET ON", get_on_bus), ("MOON DRIVER", moon_driver)])
-    choice()
+    await choice()
 
 def get_on_bus():
     print("YOU'RE ON THE BUS.")
@@ -420,7 +426,7 @@ def moon_driver():
 
 def on_bus_menu():
     choice = menu("   ON THE BUS   ", [("SLEEP", sleep_on_bus), ("STAY AWAKE", stay_awake_on_bus)])
-    choice()
+    await choice()
 
 def sleep_on_bus():
     print("YOU WAKE UP IN A BAD NEIGHBORHOOD...")
@@ -433,7 +439,7 @@ def stay_awake_on_bus():
 
 def at_school_menu():
     choice = menu("   AT SCHOOL    ", [("ROAM HALLS", roam_halls), ("GO TO LIBRARY", go_to_library)])
-    choice()
+    await choice()
 
 def roam_halls():
     print("YOU GET LOST, NEVER TO BE SEEN AGAIN.")
@@ -446,7 +452,7 @@ def go_to_library():
 
 def in_library_menu():
     choice = menu("   IN LIBRARY   ", [("STUDY", study), ("GO ONLINE", go_online)])
-    choice()
+    await choice()
 
 def study():
     print("YOUR BRAIN OVERHEATS...")
@@ -459,7 +465,7 @@ def go_online():
 
 def where_to_online():
     choice = menu("   WHERE TO?    ", [("CIA.GOV", cia_gov), ("HENTAI SITE", hentai_site), ("MY SITE", my_site)])
-    choice()
+    await choice()
 
 def cia_gov():
     print("YOU MISTAKENLY FIND GOVERNMENT SECRETS AND YOU ARE LATER KILLED 'ACCIDENTALLY'. WHEN AN ANVIL IS DROPPED ON YOUR HEAD.")
@@ -486,7 +492,7 @@ def class_menu():
         ("PRE-CAL", wrong_class),
         ("DEBATE", debate_class)
     ])
-    choice()
+    await choice()
 
 def wrong_class():
     print("WRONG CLASS!")
@@ -504,14 +510,14 @@ def debate_menu():
         ("PLAY TI-83", debate_ti83),
         ("CHECK E-MAIL", debate_email)
     ])
-    choice()
+    await choice()
 
 def debate_speak():
-    event = menu("  CHOOSE EVENT  ", [
+    choice = menu("  CHOOSE EVENT  ", [
         ("TEAM DEBATE", team_debate),
-        ("O.O.", original_oratory)
+        ("ORIGINAL ORATORY", original_oratory)
     ])
-    event()
+    await choice()
 
 def team_debate():
     print("YOU CHOOSE TEAM DEBATE.")
@@ -535,12 +541,11 @@ def original_oratory():
     next_class_menu()
 
 def debate_ti83():
-    global T
-    if T == 1:
+    if state["ti-83_confiscated"]:
         print("YOU DON'T HAVE IT!")
     else:
         print("THE TEACHER CONFISCATES IT!")
-        T = 1
+        state["ti-83_confiscated"] = True
     pause()
     debate_class()
 
@@ -554,7 +559,7 @@ def next_class_menu():
         ("LANGUAGE ARTS", language_arts),
         ("CHEMISTRY", wrong_class2)
     ])
-    choice()
+    await choice()
 
 def wrong_class2():
     print("WRONG CLASS, FOOL")
@@ -572,7 +577,7 @@ def la_menu():
         ("PLAY GAMEBOY", play_gameboy),
         ("PLAY TI-83", la_ti83)
     ])
-    choice()
+    await choice()
 
 def write_essay():
     print("YOU WRITE A KICKASS ESSAY. TIME FOR THE FINISHING TOUCHES.")
@@ -591,12 +596,11 @@ def play_gameboy():
     lunch_menu()
 
 def la_ti83():
-    global T
-    if T == 1:
+    if state["ti-83_confiscated"]:
         print("IT WAS ALREADY CONFISCATED.")
     else:
         print("THE TEACHER CONFISCATES IT.")
-        T = 1
+        state["ti-83_confiscated"] = True
     pause()
     language_arts()
 
@@ -605,7 +609,7 @@ def lunch_menu():
         ("EAT", lunch_eat),
         ("GO TO LIBRARY", lunch_library)
     ])
-    choice()
+    await choice()
 
 def lunch_eat():
     print("A REALLY REALLY FINE GIRL IN A REALLY REALLY SHORT SKIRT ASKS TO BORROW 10 BUCKS.")
@@ -614,11 +618,10 @@ def lunch_eat():
         ("LET ME CHECK", lunch_check),
         ("HELL NO!", lunch_hellno)
     ])
-    choice()
+    await choice()
 
 def lunch_check():
-    global C
-    if C == 10000000:
+    if state["cash"] == 10000000:
         print("*KISS* THANKS! :) :) :) :) :)")
         pause()
         print("SHE ASKS YOU TO MEET YOU AFTER SCHOOL.")
@@ -642,7 +645,7 @@ def lunch_eat2():
         ("BEEF TACO", lunch_beef),
         ("PIZZA", lunch_pizza)
     ])
-    choice()
+    await choice()
 
 def lunch_library():
     print("YOU GO TO THE LIBRARY.")
@@ -670,7 +673,7 @@ def after_lunch():
         ("GO ONLINE", lunch_online),
         ("NEXT CLASS", lunch_next_class)
     ])
-    choice()
+    await choice()
 
 def lunch_online():
     print("THE SCREEN FLASHES AND YOU HAVE A SEIZURE.")
@@ -687,7 +690,7 @@ def next_class2_menu():
         ("CHEMISTRY", next_chemistry),
         ("HISTORY", wrong_class3)
     ])
-    choice()
+    await choice()
 
 def wrong_class3():
     print("WRONG CLASS, FOOL")
@@ -714,7 +717,7 @@ def donut_menu():
         ("YES", donut_yes),
         ("NO", donut_no)
     ])
-    choice()
+    await choice()
 
 def donut_yes():
     print("THE SCHOOL FOOTBALL TEAM'S BIGGEST LINEBACKER LOOKS AT YOU MENACINGLY.")
@@ -723,7 +726,7 @@ def donut_yes():
         ("YES", donut_give),
         ("NO", donut_refuse)
     ])
-    choice()
+    await choice()
 
 def donut_no():
     print("YOU FALL ASLEEP WITH YOUR FACE IN HYDROCHLORIC ACID!")
@@ -750,11 +753,10 @@ def end_of_day_menu():
         ("WALK AROUND", walk_around),
         ("GO TO BUS", go_to_bus)
     ])
-    choice()
+    await choice()
 
 def go_to_bus():
-    global C
-    if C != 10000000:
+    if state["cash"] != 10000000:
         print("YOU'RE ON THE BUS")
         pause()
         bus_end_menu()
@@ -764,8 +766,7 @@ def go_to_bus():
         end_of_day_menu()
 
 def walk_around():
-    global C
-    if C == 10000000:
+    if state["cash"] == 10000000:
         print("YOU MEET UP WITH THE GIRL FROM LUNCH.")
         pause()
         print("SHE'S SIGNALING FOR YOU TO GO WITH HER INTO THE JANITOR'S CLOSET WITH HER.")
@@ -793,7 +794,7 @@ def bus_end_menu():
         ("SLEEP", bus_sleep),
         ("TALK TO PEOPLE", bus_talk)
     ])
-    choice()
+    await choice()
 
 def bus_gameboy():
     print("YOU PLAY YOUR GAMEBOY.")
@@ -850,7 +851,7 @@ def after_bus_menu():
         ("GO TO EAT", go_eat),
         ("STARE AT SUN", stare_sun)
     ])
-    choice()
+    await choice()
 
 def go_home():
     print("I SHOULD SMACK YOU FOR THINKING OF GOING RIGHT HOME!")
@@ -884,7 +885,7 @@ def airport_menu():
         ("THE AIRPORT", at_airport),
         ("HOME", airport_home)
     ])
-    choice()
+    await choice()
 
 def at_airport():
     print("YOU GO TO THERE.")
@@ -896,7 +897,7 @@ def airport_action_menu():
         ("GO EAT", airport_eat),
         ("BUY TICKET", airport_buy)
     ])
-    choice()
+    await choice()
 
 def airport_eat():
     print("YOU EAT A TUNA SANDWHICH THEN REALIZE THAT THE TUNA'S NOT DEAD YET...")
@@ -923,7 +924,7 @@ def ticket_menu():
         ("KYOTO", kyoto),
         ("TEXAS", texas)
     ])
-    choice()
+    await choice()
 
 def iraq():
     print("YOU GO TO IRAQ.")
@@ -955,11 +956,10 @@ def texas_menu():
         ("YES", texas_give),
         ("NO", texas_no)
     ])
-    choice()
+    await choice()
 
 def texas_give():
-    global T
-    if T == 0:
+    if not state["ti-83_confiscated"]:
         print("YOU GIVE HIM YOUR TI-83. HE LETS THE HOSTAGE GO AND RUNS AWAY.")
         pause()
         print("THE HOSTAGE WAS THE PRESIDENT OF TEXAS INSTRUMENTS!")
@@ -990,7 +990,7 @@ def plane_menu():
         ("SCALP TICKET", scalp_ticket),
         ("BOARD PLANE", board_plane)
     ])
-    choice()
+    await choice()
 
 def scalp_ticket():
     print("YOU SELL THE TICKET AND MAKE SOME MONEY, BUT YOU ARE STRANDED IN TEXAS!")
@@ -1032,7 +1032,7 @@ def area51_menu():
         ("YES", area51_yes),
         ("NO", area51_no)
     ])
-    choice()
+    await choice()
 
 def area51_yes():
     print("GOOD FOR YOU!")
@@ -1055,7 +1055,7 @@ def area51_book_menu():
         ("READ IT", area51_read),
         ("EAT IT", area51_eat)
     ])
-    choice()
+    await choice()
 
 def area51_eat():
     print("NOT BAD, BUT IT COULD HAVE USED SOME SALT.")
@@ -1079,7 +1079,7 @@ def area51_room_menu():
         ("225", area51_right_room),
         ("1515", area51_wrong_room)
     ])
-    choice()
+    await choice()
 
 def area51_wrong_room():
     print("IF THAT'S TOO HARD, WHY DO YOU HAVE A GRAPHING CALC.?")
@@ -1101,7 +1101,7 @@ def area51_bathroom_menu():
         ("TAKE A LOOK", area51_look),
         ("TAKE A NAP", area51_nap)
     ])
-    choice()
+    await choice()
 
 def area51_leak():
     print("AHHHHH...")
@@ -1152,7 +1152,7 @@ def area51_courtyard_menu():
         ("DANCE", area51_dance),
         ("BITE", area51_bite)
     ])
-    choice()
+    await choice()
 
 def area51_bite():
     print("YOU TAKE A BIG BITE OUT OF AN ALIEN'S JUGULAR VEIN. YOU ARE SPRAYED WITH ITS ACIDIC BLOOD.")
@@ -1240,7 +1240,7 @@ def final_menu():
         ("DIG HOLE", final_dig),
         ("GIVE UP", final_giveup)
     ])
-    choice()
+    await choice()
 
 def final_giveup():
     print("WHAT KIND OF LOSER ARE YOU!?!")
@@ -1296,6 +1296,9 @@ def game_over():
     pause()
     main_menu()
 
-if __name__ == "__main__":
+# if __name__ == "__main__": # trying out copilot's solution to SyntaxError: 'await' outside async function
+def da_game():
     load_lmndy()
     title_screen()
+
+da_game()
