@@ -21,7 +21,7 @@ try:
     CRYPTO_AVAILABLE = True
 except ImportError:
     CRYPTO_AVAILABLE = False
-    print("[WARNING] Save/load is disabled: cryptography package not found.")
+    print("[WARNING] Save/load is disabled: cryptography package not found. (ignore this on the website)")
 
 def pause(prompt = "Press Enter to continue..."):
     # Print prompt, wait for Enter, then overwrite the prompt line with spaces
@@ -129,19 +129,17 @@ def pointless_info():
     print("\nHERE'S SOME USELESS INFORMATION.")
     pause()
     print(f"YOU HAVE PLAYED THIS GAME {state['times_played']} TIMES.")
-    pause()
+    wait(1)
     print(f"YOU HAVE WON {state['times_won']} TIME(S).", 
           " >_> <_<" if state['times_won'] > state['times_played'] else "")
-    pause()
+    wait(1.5)
     if state['times_good_ending'] > 0:
         print(f"YOU HAVE ACTUALLY WON {state['times_good_ending']} TIME(S).")
-        pause()
     elif state['times_won'] == 0:
         print("KEEP ON TRYING.")
-        pause()
     elif state['times_won'] == 1:
         print("YOU'RE GETTING THE HANG OF IT.")
-        pause()
+    wait(1)
     # Return to main menu
 
 def hints():
@@ -226,7 +224,7 @@ def credits():
         "                THE END?"
     ]
     # Number of lines to show at once (like a movie credits window)
-    window = 20
+    window = 22
     # Pad with empty lines at the top and bottom for effect
     pad = ["" for _ in range(window)]
     scroll_lines = pad + credits_lines + pad
@@ -239,7 +237,7 @@ def credits():
         # Print the current window
         for line in scroll_lines[i:i+window]:
             print(line)
-        wait(0.9)
+        wait(0.8)
     state["times_won"] += 1
     save_stats()
     # quit_game()
