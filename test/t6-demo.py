@@ -43,14 +43,14 @@ state = {
 }
 
 def title_screen():
-    print("\n" + "="*50)
-    print("    A MODERN ADVENTURE OF EPIC PROPORTIONS")
+    print("="*41)
+    print("A MODERN ADVENTURE OF EPIC PROPORTIONS")
     wait()
-    print("\n    {}{}{}{}{}{}{}{}{}{}{}")
-    print("   {{{{{{{{ MONDAY }}}}}}}}")
-    print("    {}{}{}{}{}{}{}{}{}{}{}")
-    print("\n       DEMO VERSION")
-    print("="*50)
+    print("         {}{}{}{}{}{}{}{}{}{}{}")
+    print("       {{{{{{{{ MONDAY }}}}}}}}")
+    print("        {}{}{}{}{}{}{}{}{}{}{}")
+    print("\n              DEMO VERSION")
+    print(" ", "="*35)
     pause()
     main_menu()
 

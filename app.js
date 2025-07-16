@@ -5,6 +5,14 @@ let pythonProgram = '';
 let isWaitingForInput = false;
 let inputResolver = null;
 
+// Check if we're using the game CSS (as opposed to chat CSS)
+const isGameMode = document.querySelector('link[href*="styles_game"]') !== null;
+if (isGameMode) {
+    const userInput = document.getElementById('user-input');
+    userInput.setAttribute('inputmode', 'numeric');
+    userInput.setAttribute('pattern', '[0-9]*');
+}
+
 // Import from the transformInputToAsync module
 import { transformPythonForPyodide } from './transformInputToAsync.js';
 // Import from the concatenatePrints module

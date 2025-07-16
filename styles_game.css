@@ -57,7 +57,7 @@ header p {
 
 .chat-output {
     flex: 1;
-    padding: 20px 20px 40px 20px;
+    padding: 20px 20px 40px 8px; /* Reduced left padding */
     overflow-y: auto;
     background: #222;  /* Dark background for game text */
     border-bottom: 1px solid #333;
@@ -103,7 +103,7 @@ header p {
     background: #222;  /* Same as chat-output background */
     color: #0f0;  /* Classic terminal green */
     border: none;
-    padding: 4px 16px;
+    padding: 4px 8px 4px 0;  /* top right bottom left */
 }
 
 /* System messages (like "Press Enter to continue...") */
@@ -112,7 +112,7 @@ header p {
     color: #aaa;  /* Muted color */
     font-style: italic;
     border-left: 4px solid #555;
-    padding: 8px 16px;
+    padding: 8px 8px;
 }
 
 .input-container {
@@ -141,6 +141,10 @@ header p {
     color: #0f0;  /* Match the game text color */
     outline: none;
     transition: all 0.3s ease;
+    /* Style for numeric input */
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 #user-input:focus {
@@ -275,4 +279,123 @@ button:disabled {
 
 .chat-output::-webkit-scrollbar-thumb:hover {
     background: #555;
+}
+
+/* Mobile responsive styles */
+/* Mobile-first responsive design */
+@media screen and (max-width: 600px) {
+    /* Container and body adjustments */
+    body {
+        padding: 5px;  /* Reduce the purple background padding */
+    }
+    
+    .container {
+        margin: 0;
+        min-height: calc(100vh - 10px);
+        border-radius: 8px;
+    }
+
+    /* Header adjustments */
+    header {
+        padding: 15px 10px;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+        margin-bottom: 4px;
+    }
+
+    header p {
+        font-size: 0.9rem;
+        line-height: 1.3;
+    }
+
+    /* Chat output adjustments */
+    .chat-output {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .python-message .message-content {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .system-message .message-content {
+        font-size: 13px;
+        padding: 6px 8px;
+    }
+
+    /* Input container adjustments */
+    .input-container {
+        padding: 8px;
+        gap: 8px;
+    }
+
+    .input-group {
+        gap: 6px;
+    }
+
+    #user-input {
+        padding: 8px 12px;
+        font-size: 14px;
+        min-height: 36px;
+    }
+
+    #send-button {
+        padding: 8px 15px;
+        font-size: 14px;
+        min-width: 60px;
+    }
+
+    /* Control buttons adjustments */
+    .controls {
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    #run-script-button, #clear-button {
+        padding: 6px 12px;
+        font-size: 13px;
+        flex: 1;
+        min-width: 120px;
+    }
+
+    /* Status bar adjustments */
+    .status-bar {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+}
+
+@media screen and (min-width: 601px) and (max-width: 900px) {
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    .python-message .message-content {
+        font-size: 15px;
+    }
+
+    .system-message .message-content {
+        font-size: 13px;
+    }
+
+    .chat-output {
+        padding: 15px 15px 30px 15px;
+    }
+
+    .input-container {
+        padding: 10px;
+    }
+
+    #user-input, #send-button {
+        font-size: 15px;
+        padding: 10px 15px;
+    }
+
+    .controls button {
+        font-size: 13px;
+        padding: 8px 14px;
+    }
 }
