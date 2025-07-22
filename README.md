@@ -37,12 +37,9 @@ Monday is an interactive fiction game where you navigate through a increasingly 
 
 ## Notable Features
 
-- 🎭 **Original story** by LazySpaniard
+- 🎭 **Original story** by two late 90's high school boys
 - 🔄 **Multiple paths** leading to victory or hilarious defeat
 - 🎮 **Simple controls** - Just make choices and try to stay alive
-- 📝 **Asks for the user's name** and responds personally
-- 🎂 **Asks for the user's age** and acknowledges it
-- 💬 **Demonstrates basic input/output** in the browser environment
 
 ## Famous Last Words
 
@@ -61,7 +58,7 @@ Here are some of the many ways players have met their end:
 While we won't spoil the entire solution, here are some hints to help you survive:
 
 1. **Morning Routine**: Sometimes the obvious choice is the right one
-2. **School Day**: Pay attention in class (or don't, depending on the situation)
+2. **School Day**: Pay attention in class (or don't)
 3. **Lunch Time**: Be generous, but keep your guard up
 4. **After School**: Choose your adventures wisely
 5. **The End?**: When in doubt, channel your inner comedian
@@ -88,6 +85,6 @@ The game is filled with pop culture references and hidden jokes. Keep an eye out
 
 ## Credits
 
-Original game concept and writing by LazySpaniard. Now available online for a new generation of players to experience the most bizarre Monday ever.
+Original game concept and writing by [Everett](https://actuallynotbad.org/) and [Diego](https://actuallynotbad.org/diego/). Now available online for a new generation of players to experience the most bizarre 90's Monday ever.
 
 Remember: Death is just the beginning... of another attempt! Good luck, and may your Monday be survivable! 🎮✨

@@ -100,7 +100,7 @@ print("Python environment ready!")
         runScriptButton.disabled = false;
         userInput.placeholder = 'Type a message...';
         
-        addMessage('system', 'Python environment initialized successfully! Click "Run Python Program" to start the interactive program.');
+        addMessage('system', 'Python environment initialized successfully! Click "Play Game" to start the interactive game.');
         
     } catch (error) {
         console.error('Initialization error:', error);
@@ -215,7 +215,7 @@ await main()
         `;
         
         await pyodide.runPythonAsync(asyncProgram);
-        addMessage('system', 'Program finished. Click "Run Python Program" to start again.');
+        addMessage('system', 'Game finished. Click "Play Game" to start again.');
     } catch (error) {
         console.error('Program execution error:', error);
         addMessage('error', `Program error: ${error.message}`);
@@ -238,7 +238,7 @@ function handleUserInput() {
     if (input) {
         addMessage('user', input);
         userInput.value = '';
-        addMessage('system', 'No input expected right now. Click "Run Python Program" to start the program.');
+        addMessage('system', 'No input expected right now. Click "Play Game" to start the game.');
     }
 }
 
