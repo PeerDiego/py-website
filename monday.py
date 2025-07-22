@@ -43,6 +43,7 @@ state = {
     "cash"              : 0,
     "ti-83_confiscated" : False,  # True if confiscated, False if player has it
     "has_money"         : False,
+    "insists_on_going_home" : 0,  # inisists on going home at end of day; bypass win route
     # Statistics tracking (formerly LMNDY list)
     "times_played"      : 0,  # Number of times game has been played
     "times_won"         : 0,  # Number of times player has won
@@ -159,7 +160,7 @@ def hint_yes():
     await choice()
 
 def hint_loser():
-    print("LOSER.")
+    print("NO MORE HINTS FOR YOU! LOSER.")
     pause()
     # Return to main menu
 
@@ -217,7 +218,7 @@ def credits():
         " SENIOR PLAY-TESTERS   ANDRE 'MR. BOMBASTIC' OLIVEIRA",
         " SENIOR PLAY-TESTERS   DIEGO 'THE MASTER-HENTAI'",
         "          CREATED IN   TI-83 BASIC",
-        "    2025 PYTHON PORT   GITHUB COPILOT",
+        "    2025 PYTHON PORT   GITHUB COPILOT, DIEGO",
         "",
         "           COPYRIGHT   2001",
         "",
@@ -767,13 +768,15 @@ def end_of_day_menu():
     await choice()
 
 def go_to_bus():
-    if state["cash"] != 10000000:
-        print("YOU'RE ON THE BUS")
+    insistant = state["insists_on_going_home"] > 1
+    if state["cash"] != 10000000 or insistant:
+        print("FINE! " if insistant else "","YOU'RE ON THE BUS...")
         pause()
         bus_end_menu()
     else:
-        print("GO MEET THE GIRL, FOOL!!!")
+        print("WHAT ARE YOU, GAY? " if state["insists_on_going_home"] else "", "GO MEET THE GIRL, FOOL!!!")
         pause()
+        state["insists_on_going_home"] += 1
         end_of_day_menu()
 
 def walk_around():
@@ -919,13 +922,16 @@ def airport_home():
     game_over()
 
 def airport_buy():
-    print("YOU HAVE NO CASH")
-    pause()
-    print("YOU SEE A CREDIT CARD ON THE FLOOR.")
-    pause()
-    print("ITS TED TURNER'S!")
-    pause()
-    print("YOU BUY A TICKET")
+    if state["cash"] != 10000000:
+        print("YOU HAVE NO CASH")
+        pause()
+        print("YOU SEE A CREDIT CARD ON THE FLOOR.")
+        pause()
+        print("ITS TED TURNER'S!")
+        pause()
+        print("YOU BUY A TICKET")
+    else:
+        print("WHY NOT. YOU HAVE ALL THIS MONEY TO BURN.")
     pause()
     ticket_menu()
 
@@ -1075,7 +1081,7 @@ def area51_eat():
     game_over()
 
 def area51_read():
-    print("YOU OPEN  THE BOOK AND A KEY FALLS OUT.")
+    print("YOU OPEN THE BOOK AND A KEY FALLS OUT.")
     pause()
     print("THE KEYCHAIN SAYS: ROOM 15^2.")
     pause()
@@ -1224,6 +1230,8 @@ def area51_jokes():
     print("YEA, SURE.")
     pause()
     print("YOU GIVE IT TO HER AND YOU TWO LIVE HAPPILY EVER AFTER.")
+    pause()
+    print("...")
     pause()
     print("WHAT THE HELL KIND OF ENDING WAS THAT?!?!")
     pause()
