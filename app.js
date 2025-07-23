@@ -36,9 +36,6 @@ const clearButton = document.getElementById('clear-button');
 const status = document.getElementById('status');
 const pythonVersion = document.getElementById('python-version');
 
-// Import from the transformInputToAsync module
-import { transformPythonForPyodide } from './transformInputToAsync.js';
-
 // Initialize Pyodide
 async function initializePyodide() {
     try {
