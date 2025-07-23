@@ -18,9 +18,10 @@ def wait(s=2.0):
     print()
 
 def menu(title, options):
-    print(f"\n{title}")
+    menu_text = f"\n{title}"
     for i, (label, _) in enumerate(options, 1):
-        print(f"  {i}. {label}")
+        menu_text += f"\n  {i}. {label}"
+    print(menu_text, "\n\n")
     while True:
         try:
             choice = int(input("Choose: "))
