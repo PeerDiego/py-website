@@ -23,21 +23,25 @@ A modern web application that runs Python programs directly in the browser using
 ## Project Structure
 
 ```text
-├── index.html      # Main HTML file with chat interface
-├── styles.css      # Modern CSS styling  
-├── app.js          # JavaScript for Pyodide integration
-├── main.py         # Your Python program (edit this!)
-└── README.md       # This file
+├── index.html           # Main HTML file with chat interface
+├── styles_chat.css      # Modern CSS styling  
+├── app.js               # JavaScript for Pyodide integration
+├── main.py              # Your Python program (edit this!)
+├── transformInputToAsync.js  # Attempts to convert Python code to async versions
+├── concatenatePrints.js      # Combines consecutive print statements
+├── debugUtils.js             # Utilities for debugging Python execution
+└── README.md            # This file
 ```
 
 ## The Python Program (main.py)
 
-The included `main.py` file contains a simple interactive program that:
+The included `main.py` file contains a demo program showcasing:
 
-- 👋 **Welcomes the user** with a friendly greeting
-- 📝 **Asks for the user's name** and responds personally
-- 🎂 **Asks for the user's age** and acknowledges it
-- 💬 **Demonstrates basic input/output** in the browser environment
+- 🎮 **Menu-driven interface** with numeric choices
+- 📝 **State management** using dictionaries instead of globals
+- ⏰ **Async/await patterns** for input and delays
+- 💬 **Multiple consecutive prints** handled properly
+- ⌛ **Pause/wait functionality** for pacing
 
 This is a simple demonstration program that shows how Python `input()` and `print()` functions work seamlessly in the browser chat interface.
 
@@ -48,21 +52,35 @@ This is a simple demonstration program that shows how Python `input()` and `prin
 3. **Real-time Display**: Output appears immediately as the program runs
 4. **Error Handling**: Python errors are displayed clearly in the chat
 
-## Customizing the Python Program
+## Example Python Program
 
 Edit `main.py` to create your own interactive program:
 
 ```python
-# Your custom Python program
-print("Welcome to my custom program!")
+# Simple Interactive Python Program
+print("🎉 Welcome to the Interactive Python Chat!")
 
 name = input("What's your name? ")
-print(f"Hello, {name}!")
+print(f"Hello, {name.title()}! Nice to meet you! 👋")
+
+# Demonstration of time.sleep()
+time.sleep(3)
 
 age = input("How old are you? ")
-print(f"You are {age} years old.")
+try:
+    age_int = int(age)
+    if age_int < 13:
+        print("You're a kid! Enjoy your childhood.")
+    elif 13 <= age_int < 20:
+        print("You're a teenager! Exciting times ahead.")
+    elif 20 <= age_int < 65:
+        print("You're an adult! Keep striving for your goals.")
+    else:
+        print("You're a senior! Wisdom comes with age.")
+except ValueError:
+    print("That doesn't seem to be a valid age.")
 
-# Add your own logic here...
+print("This demonstrates Python input/output in the browser.")
 ```
 
 ## Example Interactions
@@ -74,9 +92,10 @@ The chat interface will show:
 🤖 Python: What's your name?
 👤 User: Alice
 🤖 Python: Hello, Alice! Nice to meet you! 👋
+[3 second pause]
 🤖 Python: How old are you?
 👤 User: 25
-🤖 Python: You said you are 25 years old.
+🤖 Python: You're an adult! Keep striving for your goals.
 🤖 Python: This demonstrates Python input/output in the browser.
 ```
 
@@ -113,5 +132,34 @@ Since this is a pure client-side application, you can deploy it anywhere:
 - Interactive input/output works smoothly with the async implementation
 - Memory usage is reasonable for most applications
 - The chat interface remains responsive during Python execution
+
+## Python Code Compatibility
+
+When adapting Python code to run in the browser with Pyodide, there are several important considerations:
+
+### Async/Await Requirements
+
+- Any code that makes the program wait (input, sleep, pause) must use async/await
+- The system will automatically transform many common functions to async versions
+- Functions that call other async functions must also be async themselves
+
+### Global Variables
+
+- Global variables don't work reliably in the Pyodide environment
+- Use a dictionary to store state instead, for example:
+  ```python
+  state = {
+      "running": True,
+      "score": 0,
+      "player_name": ""
+  }
+  ```
+
+### Common Issues to Watch For
+
+- Don't use `exit()` or `sys.exit()` - they won't work properly in the browser
+  - Instead, use a return statement or set a state flag like `state["running"] = False`
+- The `if __name__ == "__main__":` block should be replaced with a regular function call
+- Console clearing commands (`cls`, `clear`) won't work in the browser environment
 
 Enjoy coding Python in the browser! 🐍✨
