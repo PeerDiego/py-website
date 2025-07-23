@@ -123,7 +123,7 @@ def main_menu():
             ("ABOUT", about),
             ("QUIT GAME", quit_game)
         ])
-        await choice()
+        choice()
     print("Thanks for playing!")
 
 def pointless_info():
@@ -145,7 +145,7 @@ def pointless_info():
 
 def hints():
     choice = menu("  WANT A HINT?  ", [("YES", hint_yes), ("NO", main_menu)])
-    await choice()
+    choice()
 
 def hint_yes():
     print("KEEP THIS IN MIND:")
@@ -157,7 +157,7 @@ def hint_yes():
     print("  MUHUWAHAHAHA")
     pause()
     choice = menu("WANT MORE HINTS?", [("YEA", hint_loser), ("NOPE", main_menu)])
-    await choice()
+    choice()
 
 def hint_loser():
     print("NO MORE HINTS FOR YOU! LOSER.")
@@ -272,7 +272,7 @@ def wakeup_menu():
             ("GET UP", get_up),
             ("SMASH STEREO", smash_stereo)
         ])
-        if await choice():
+        if choice():
             break
 
 def snooze():
@@ -298,7 +298,7 @@ def get_up():
 
 def bathroom_menu():
     choice = menu("   DO YOU GO?   ", [("RELIEVE SELF", relieve_self), ("HOLD IT IN", hold_it_in)])
-    await choice()
+    choice()
 
 def hold_it_in():
     print("YOU WET YOUR PANTS.")
@@ -324,7 +324,7 @@ def ed_mcmahon():
 
 def breakfast_menu():
     choice = menu("   NOW WHAT?    ", [("EAT BREAKFAST", eat_breakfast), ("WASH HANDS", wash_hands), ("GO TO BUS STOP", skip_breakfast)])
-    await choice()
+    choice()
 
 def eat_breakfast():
     print("YOU DIDN'T WASH YOUR HANDS. THAT'S SICK! THE GERMS EVENTUALLY OVERRUN YOU.")
@@ -346,7 +346,7 @@ def after_wash():
 
 def food_menu():
     choice = menu("    EAT WHAT?   ", [("POP-TART", poptart), ("FROZEN PIZZA", frozen_pizza), ("CEREAL", cereal)])
-    await choice()
+    choice()
 
 def poptart():
     print("IT IS STUCK IN THE TOASTER SO YOU TRY TO PRY IT OUT WITH A FORK. METAL CONDUCTS ELECTRICITY, FOOL!")
@@ -363,7 +363,7 @@ def cereal():
 
 def pack_bag_menu():
     choice = menu("   NOW WHAT?    ", [("PACK BAG", pack_bag), ("BRUSH TEETH", brush_teeth)])
-    await choice()
+    choice()
 
 def pack_bag():
     print("DISGUSTING! YOU DIDN'T BRUSH YOUR TEETH!")
@@ -376,7 +376,7 @@ def brush_teeth():
 
 def after_brush():
     choice = menu("    AND NOW?    ", [("PACK BAG", pack_bag2), ("LEAVE FOR BUS", leave_for_bus)])
-    await choice()
+    choice()
 
 def pack_bag2():
     print("DON'T FORGET YOUR TI-83, GAMEBOY AND CD PLAYER. ONLY WHAT'S NECESSARY.")
@@ -389,11 +389,11 @@ def leave_for_bus():
 
 def bus_menu():
     choice = menu("   PACKED BAG   ", [("GO TO BUS STOP", get_to_bus_stop), ("BACK TO BED", back_to_bed)])
-    await choice()
+    choice()
 
 def get_to_bus_stop():
     choice = menu("HOW TO GET THERE", [("WALK", walk_to_bus), ("RUN", run_to_bus)])
-    await choice()
+    choice()
 
 def back_to_bed():
     print("YOU GO BACK TO YOUR ROOM. THERE IS A PSYCHO WAITING FOR YOU... WEARING A MONICA LEWENSKI MASK...")
@@ -410,7 +410,7 @@ def run_to_bus():
 
 def at_bus_stop():
     choice = menu("AT THE BUS STOP ", [("SIT", sit_at_bus), ("STAND", stand_at_bus)])
-    await choice()
+    choice()
 
 def sit_at_bus():
     print("A CAR RUNS YOU DOWN. WHY? YOU SAT IN THE WET CEMENT THAT SOME JOKER LEFT AND YOU WERE UNABLE TO AVOID A CAR DRIVING ON THE SIDEWALK.")
@@ -425,7 +425,7 @@ def bus_arrives():
     print("THE BUS COMES.")
     pause()
     choice = menu("  IT'S WAITING  ", [("GET ON", get_on_bus), ("MOON DRIVER", moon_driver)])
-    await choice()
+    choice()
 
 def get_on_bus():
     print("YOU'RE ON THE BUS.")
@@ -438,7 +438,7 @@ def moon_driver():
 
 def on_bus_menu():
     choice = menu("   ON THE BUS   ", [("SLEEP", sleep_on_bus), ("STAY AWAKE", stay_awake_on_bus)])
-    await choice()
+    choice()
 
 def sleep_on_bus():
     print("YOU WAKE UP IN A BAD NEIGHBORHOOD...")
@@ -451,7 +451,7 @@ def stay_awake_on_bus():
 
 def at_school_menu():
     choice = menu("   AT SCHOOL    ", [("ROAM HALLS", roam_halls), ("GO TO LIBRARY", go_to_library)])
-    await choice()
+    choice()
 
 def roam_halls():
     print("YOU GET LOST, NEVER TO BE SEEN AGAIN.")
@@ -464,7 +464,7 @@ def go_to_library():
 
 def in_library_menu():
     choice = menu("   IN LIBRARY   ", [("STUDY", study), ("GO ONLINE", go_online)])
-    await choice()
+    choice()
 
 def study():
     print("YOUR BRAIN OVERHEATS...")
@@ -477,7 +477,7 @@ def go_online():
 
 def where_to_online():
     choice = menu("   WHERE TO?    ", [("CIA.GOV", cia_gov), ("HENTAI SITE", hentai_site), ("MY SITE", my_site)])
-    await choice()
+    choice()
 
 def cia_gov():
     print("YOU MISTAKENLY FIND GOVERNMENT SECRETS AND YOU ARE LATER KILLED 'ACCIDENTALLY'. WHEN AN ANVIL IS DROPPED ON YOUR HEAD.")
@@ -504,7 +504,7 @@ def class_menu():
         ("PRE-CAL", wrong_class),
         ("DEBATE", debate_class)
     ])
-    await choice()
+    choice()
 
 def wrong_class():
     print("WRONG CLASS!")
@@ -522,14 +522,14 @@ def debate_menu():
         ("PLAY TI-83", debate_ti83),
         ("CHECK E-MAIL", debate_email)
     ])
-    await choice()
+    choice()
 
 def debate_speak():
     choice = menu("  CHOOSE EVENT  ", [
         ("TEAM DEBATE", team_debate),
         ("ORIGINAL ORATORY", original_oratory)
     ])
-    await choice()
+    choice()
 
 def team_debate():
     print("YOU CHOOSE TEAM DEBATE.")
@@ -571,7 +571,7 @@ def next_class_menu():
         ("LANGUAGE ARTS", language_arts),
         ("CHEMISTRY", wrong_class2)
     ])
-    await choice()
+    choice()
 
 def wrong_class2():
     print("WRONG CLASS, FOOL")
@@ -589,7 +589,7 @@ def la_menu():
         ("PLAY GAMEBOY", play_gameboy),
         ("PLAY TI-83", la_ti83)
     ])
-    await choice()
+    choice()
 
 def write_essay():
     print("YOU WRITE A KICKASS ESSAY. TIME FOR THE FINISHING TOUCHES.")
@@ -621,7 +621,7 @@ def lunch_menu():
         ("EAT", lunch_eat),
         ("GO TO LIBRARY", lunch_library)
     ])
-    await choice()
+    choice()
 
 def lunch_eat():
     print("A REALLY REALLY FINE GIRL IN A REALLY REALLY SHORT SKIRT ASKS TO BORROW 10 BUCKS.")
@@ -630,7 +630,7 @@ def lunch_eat():
         ("LET ME CHECK", lunch_check),
         ("HELL NO!", lunch_hellno)
     ])
-    await choice()
+    choice()
 
 def lunch_check():
     if state["cash"] == 10000000:
@@ -657,7 +657,7 @@ def lunch_eat2():
         ("BEEF TACO", lunch_beef),
         ("PIZZA", lunch_pizza)
     ])
-    await choice()
+    choice()
 
 def lunch_library():
     print("YOU GO TO THE LIBRARY.")
@@ -685,7 +685,7 @@ def after_lunch():
         ("GO ONLINE", lunch_online),
         ("NEXT CLASS", lunch_next_class)
     ])
-    await choice()
+    choice()
 
 def lunch_online():
     print("THE SCREEN FLASHES AND YOU HAVE A SEIZURE.")
@@ -702,7 +702,7 @@ def next_class2_menu():
         ("CHEMISTRY", next_chemistry),
         ("HISTORY", wrong_class3)
     ])
-    await choice()
+    choice()
 
 def wrong_class3():
     print("WRONG CLASS, FOOL")
@@ -729,7 +729,7 @@ def donut_menu():
         ("YES", donut_yes),
         ("NO", donut_no)
     ])
-    await choice()
+    choice()
 
 def donut_yes():
     print("THE SCHOOL FOOTBALL TEAM'S BIGGEST LINEBACKER LOOKS AT YOU MENACINGLY.")
@@ -738,7 +738,7 @@ def donut_yes():
         ("YES", donut_give),
         ("NO", donut_refuse)
     ])
-    await choice()
+    choice()
 
 def donut_no():
     print("YOU FALL ASLEEP WITH YOUR FACE IN HYDROCHLORIC ACID!")
@@ -765,7 +765,7 @@ def end_of_day_menu():
         ("WALK AROUND", walk_around),
         ("GO TO BUS", go_to_bus)
     ])
-    await choice()
+    choice()
 
 def go_to_bus():
     insistant = state["insists_on_going_home"] > 1
@@ -808,7 +808,7 @@ def bus_end_menu():
         ("SLEEP", bus_sleep),
         ("TALK TO PEOPLE", bus_talk)
     ])
-    await choice()
+    choice()
 
 def bus_gameboy():
     print("YOU PLAY YOUR GAMEBOY.")
@@ -865,7 +865,7 @@ def after_bus_menu():
         ("GO TO EAT", go_eat),
         ("STARE AT SUN", stare_sun)
     ])
-    await choice()
+    choice()
 
 def go_home():
     print("I SHOULD SMACK YOU FOR THINKING OF GOING RIGHT HOME!")
@@ -899,7 +899,7 @@ def airport_menu():
         ("THE AIRPORT", at_airport),
         ("HOME", airport_home)
     ])
-    await choice()
+    choice()
 
 def at_airport():
     print("YOU GO TO THERE.")
@@ -911,7 +911,7 @@ def airport_action_menu():
         ("GO EAT", airport_eat),
         ("BUY TICKET", airport_buy)
     ])
-    await choice()
+    choice()
 
 def airport_eat():
     print("YOU EAT A TUNA SANDWHICH THEN REALIZE THAT THE TUNA'S NOT DEAD YET...")
@@ -941,7 +941,7 @@ def ticket_menu():
         ("KYOTO", kyoto),
         ("TEXAS", texas)
     ])
-    await choice()
+    choice()
 
 def iraq():
     print("YOU GO TO IRAQ.")
@@ -973,7 +973,7 @@ def texas_menu():
         ("YES", texas_give),
         ("NO", texas_no)
     ])
-    await choice()
+    choice()
 
 def texas_give():
     if not state["ti-83_confiscated"]:
@@ -1009,7 +1009,7 @@ def plane_menu():
         ("SCALP TICKET", scalp_ticket),
         ("BOARD PLANE", board_plane)
     ])
-    await choice()
+    choice()
 
 def scalp_ticket():
     print("YOU SELL THE TICKET AND MAKE SOME MONEY, BUT YOU ARE STRANDED IN TEXAS!")
@@ -1051,7 +1051,7 @@ def area51_menu():
         ("YES", area51_yes),
         ("NO", area51_no)
     ])
-    await choice()
+    choice()
 
 def area51_yes():
     print("GOOD FOR YOU!")
@@ -1074,7 +1074,7 @@ def area51_book_menu():
         ("READ IT", area51_read),
         ("EAT IT", area51_eat)
     ])
-    await choice()
+    choice()
 
 def area51_eat():
     print("NOT BAD, BUT IT COULD HAVE USED SOME SALT.")
@@ -1098,7 +1098,7 @@ def area51_room_menu():
         ("225", area51_right_room),
         ("1515", area51_wrong_room)
     ])
-    await choice()
+    choice()
 
 def area51_wrong_room():
     print("IF THAT'S TOO HARD, WHY DO YOU HAVE A GRAPHING CALC.?")
@@ -1120,7 +1120,7 @@ def area51_bathroom_menu():
         ("TAKE A LOOK", area51_look),
         ("TAKE A NAP", area51_nap)
     ])
-    await choice()
+    choice()
 
 def area51_leak():
     print("AHHHHH...")
@@ -1171,7 +1171,7 @@ def area51_courtyard_menu():
         ("DANCE", area51_dance),
         ("BITE", area51_bite)
     ])
-    await choice()
+    choice()
 
 def area51_bite():
     print("YOU TAKE A BIG BITE OUT OF AN ALIEN'S JUGULAR VEIN. YOU ARE SPRAYED WITH ITS ACIDIC BLOOD.")
@@ -1261,7 +1261,7 @@ def final_menu():
         ("DIG HOLE", final_dig),
         ("GIVE UP", final_giveup)
     ])
-    await choice()
+    choice()
 
 def final_giveup():
     print("WHAT KIND OF LOSER ARE YOU!?!")
