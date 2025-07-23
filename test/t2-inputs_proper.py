@@ -1,4 +1,6 @@
-# once transformed, this is what the python code should look like to run properly in the browser w/ Piodide
+# EXAMPLE PYTHON CODE FOR INPUT HANDLING IN PYODIDE
+# This code won't run locally, it's been transformed and is meant to be run in the browser with Pyodide.
+# Once transformed, this is what the python code should look like to run properly in the browser w/ Piodide
 print("[TEST 1] Input statement")
 user_input = await input("Enter something: ")
 print(f"You entered: {user_input}")

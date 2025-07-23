@@ -23,21 +23,26 @@ A modern web application that runs Python programs directly in the browser using
 ## Project Structure
 
 ```text
-├── index.html      # Main HTML file with chat interface
-├── styles.css      # Modern CSS styling  
-├── app.js          # JavaScript for Pyodide integration
-├── main.py         # Your Python program (edit this!)
-└── README.md       # This file
+├── index.html           # Main HTML file with chat interface
+├── styles_chat.css      # Modern CSS styling  
+├── styles_game.css      # Modern CSS styling for text-based game  
+├── app.js               # JavaScript for Pyodide integration
+├── main.py              # Your Python program (edit this!)
+├── transformInputToAsync.js  # Attempts to convert Python code to async versions
+├── concatenatePrints.js      # Combines consecutive print statements
+├── debugUtils.js             # Utilities for debugging Python execution
+└── README.md            # This file
 ```
 
 ## The Python Program (main.py)
 
-The included `main.py` file contains a simple interactive program that:
+The included `main.py` file contains a demo program showcasing:
 
-- 👋 **Welcomes the user** with a friendly greeting
-- 📝 **Asks for the user's name** and responds personally
-- 🎂 **Asks for the user's age** and acknowledges it
-- 💬 **Demonstrates basic input/output** in the browser environment
+- 🎮 **Menu-driven interface** with numeric choices
+- 📝 **State management** using dictionaries instead of globals
+- ⏰ **Async/await patterns** for input and delays
+- 💬 **Multiple consecutive prints** handled properly
+- ⌛ **Pause/wait functionality** for pacing
 
 This is a simple demonstration program that shows how Python `input()` and `print()` functions work seamlessly in the browser chat interface.
 

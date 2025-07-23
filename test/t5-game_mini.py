@@ -15,7 +15,7 @@ def pause(prompt="Press Enter to continue..."):
 
 def wait(s=2.0):
     time.sleep(s)
-    print()
+    # print()
 
 def menu(title, options):
     menu_text = f"\n{title}"
@@ -34,10 +34,10 @@ def menu(title, options):
 # Demo game state
 state = {
     "running": True,
+    "snooze_count": 0,
+    "pants_wet": False,
+    "has_money": False
 }
-snooze_count = 0
-pants_wet = False
-has_money = False
 
 def title_screen():
     print("\n" + "="*50)

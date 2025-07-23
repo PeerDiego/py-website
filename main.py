@@ -1,6 +1,6 @@
 """
 MONDAY - Demo Version
-A short text adventure demo featuring the opening sequence
+A short text adventure demo featuring the opening sequence meant as an example program for this project.
 """
 
 import time
