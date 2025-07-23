@@ -25,7 +25,6 @@ A modern web application that runs Python programs directly in the browser using
 ```text
 ├── index.html           # Main HTML file with chat interface
 ├── styles_chat.css      # Modern CSS styling  
-├── styles_game.css      # Modern CSS styling for text-based game  
 ├── app.js               # JavaScript for Pyodide integration
 ├── main.py              # Your Python program (edit this!)
 ├── transformInputToAsync.js  # Attempts to convert Python code to async versions
@@ -53,7 +52,7 @@ This is a simple demonstration program that shows how Python `input()` and `prin
 3. **Real-time Display**: Output appears immediately as the program runs
 4. **Error Handling**: Python errors are displayed clearly in the chat
 
-## Customizing the Python Program
+## Example Python Program
 
 Edit `main.py` to create your own interactive program:
 
