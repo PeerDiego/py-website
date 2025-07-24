@@ -1079,7 +1079,7 @@ def board_plane():
             print("YOUR BACKPACK IS NOWHERE TO BE FOUND.")
             pause()
         if state["cash"]:
-            print(f"{"" if state["ti-83_confiscated"] else "AND "}YOUR CASH IS GONE!")
+            print(f"{'' if state['ti-83_confiscated'] else 'AND '}YOUR CASH IS GONE!")
             pause()
     print("YOUR GPS TELLS YOU THAT YOU ARE NEAR ROSWELL, NM.")
     pause()
