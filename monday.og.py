@@ -37,18 +37,22 @@ def wait(s=2.0):
 # Game state dictionary - maintains state across different functions
 # This is a workaround for the limitations of Pyodide's handling of global variables
 state = {
-    "running"           : True,
-    "snooze_count"      : 0,
-    "pants_wet"         : False,
-    "cash"              : 0,
-    "ti-83_confiscated" : False,  # True if confiscated, False if player has it
-    "has_money"         : False,
-    "insists_on_going_home" : 0,  # inisists on going home at end of day; bypass win route
     # Statistics tracking (formerly LMNDY list)
     "times_played"      : 0,  # Number of times game has been played
     "times_won"         : 0,  # Number of times player has won
     "times_good_ending" : 0,  # Number of times player got the good ending
 }
+def initialize_state():
+    """Initialize the game state with default values."""
+    state["running"] = True
+    state["snooze_count"] = 0
+    state["pants_wet"] = False
+    state["cash"] = 0
+    state["ti-83_confiscated"] = False  # True if confiscated, False if player has it
+    state["has_money"] = False
+    state["insists_on_going_home"] = 0  # insists on going home at end of day; bypass win route
+initialize_state()
+
 
 def menu(title, options):
     menu_text = f"\n{title}"
@@ -155,32 +159,54 @@ def hint_yes():
     print("SOME DECISIONS WON'T AFFECT YOU UNTIL LATER ON.")
     pause()
     print("  MUHUWAHAHAHA")
+    wait()
+    choice = menu("WANT MORE HINTS?", [("YEA", hint_yes_two), ("NOPE", main_menu)])
+    choice()
+
+def hint_yes_two():
+    print("PERSEVERANCE AND GRIT ARE GOOD QUALITIES.")
+    wait(1)
+    choice = menu("MORE HINTS?", [("YES PLEASE", hint_yes_three), ("NO, I'LL FLEX MY GRIT", main_menu)])
+    choice()
+
+def hint_yes_three():
+    print("SOME CHOICES ARE NOT AS OBVIOUS AS THEY SEEM.")
     pause()
-    choice = menu("WANT MORE HINTS?", [("YEA", hint_loser), ("NOPE", main_menu)])
+    print("SOMETIMES YOU HAVE TO THINK OUTSIDE THE BOX.")
+    pause()
+    print("OR MAYBE JUST THINK AT ALL.")
+    wait()
+    choice = menu("EVEN MORE HINTS?", [("YEA, I'M DESPERATE", hint_yes_four), ("NAW DUDE, I'M GOOD", main_menu)])
+    choice()
+
+def hint_yes_four():
+    print("MONEY IS THE ROOT OF ALL THAT KILLS.")
+    wait(3)
+    choice = menu("WANT EVEN MORE HINTS!? HMM???", [("YES, JUST SPOON FEED ME PLEASE", hint_loser), ("NO, I WILL THINK FOR MYSELF. THANKS", main_menu)])
     choice()
 
 def hint_loser():
-    print("NO MORE HINTS FOR YOU! LOSER.")
+    print("NO MORE HINTS FOR YOU! LOSER.\n")
     pause()
     # Return to main menu
 
 def background():
     # print()
-    print("YOU ARE A HIGH SCHOOL STUDENT.")
+    print("YOU ARE A HIGH SCHOOL STUDENT IN THE LATE 90'S.")
     wait()
     print("AND IT IS THE WORST DAY OF THE WEEK.")
     wait()
-    print("MONDAY.")
+    print("MONDAY.\n")
     wait()
-    print("'YOU' REFERS TO YOUR CHARACTER.")
+    print("\"YOU\" REFERS TO YOUR CHARACTER.")
     wait()
-    print("'ME' OR 'I' REFERS TO ME, THE PROGRAMMER.")
+    print("\"ME\" OR \"I\" REFERS TO ME, THE PROGRAMMER.")
     wait()
     print("THE GAME IS EXTREMELY LONG AND CHALLENGING, SO DON'T GIVE UP.")
     wait(3)
     print("SOME OF THE CHARACTERS ARE FICTIONAL, BUT SOME ARE BASED ON OR ARE REAL PEOPLE, SOME ARE WELL-KNOWN.")
     wait(4.3)
-    print("IT SEEMS LIKE THE WHOLE WORLD IS AGAINST YOU.")
+    print("IT SEEMS LIKE THE WHOLE WORLD IS AGAINST YOU.\n")
     wait(5)
     print("IS IT?")
     wait(2)
@@ -215,8 +241,8 @@ def credits():
         "      SADISTIC HUMOR   EVERETT, DIEGO",
         "        PLAY-TESTING   LAZ, JOHN, JENNIFER, ERIC, DEBORA, ANDRES, JOHN, MOLLY, JEFF",
         "                       HELYETT, NATHAN, GREG, SEAN, CHRIS, MARCO, KELLY AND PEDRO",
-        " SENIOR PLAY-TESTERS   ANDRE 'MR. BOOMBASTIC' OLIVEIRA",
-        " SENIOR PLAY-TESTERS   DIEGO 'THE MASTER-HENTAI'",
+        " SENIOR PLAY-TESTERS   ANDRE \"MR. BOOMBASTIC\" OLIVEIRA",
+        " SENIOR PLAY-TESTERS   DIEGO \"THE MASTER-HENTAI\"",
         "          CREATED IN   TI-83 BASIC",
         "    2025 PYTHON PORT   GITHUB COPILOT, DIEGO",
         "",
@@ -249,12 +275,24 @@ def quit_game():
         print("\n     LOSER\n   YOU DIDN'T\n EVEN START YET")
     else:
         print("\nTHANKS FOR PLAYING MONDAY!")
+        if state["times_good_ending"] > 0:
+            print("YOU'RE A CHAMPION!!\n")
     state["running"] = False
     wait(1)
     return
 
+def debug_bypass():
+    """Debug function to bypass game logic for testing purposes."""
+    # state["cash"] = 10000000  # Bypass cash requirement
+    # state["ti-83_confiscated"] = True  # Bypass TI-83 confiscation
+    # board_plane()
+    # print('nothing to bypass atm')
+    return
+
 def play_game():
     state["times_played"] += 1
+    initialize_state()
+    debug_bypass()
     print("YOU'RE IN BED, ASLEEP.")
     pause()
     print("IT'S 5:15 A.M.")
@@ -320,7 +358,7 @@ def ed_mcmahon():
     else:
         print("ED MCMAHON SHOWS UP AT YOUR DOOR TO SAY THAT YOU'VE WON 10 MILLION BUCKS. HE SEES YOUR PANTS AND IS DISGUSTED. HE TAKES BACK THE MONEY.")
         pause()
-        game_over()
+        breakfast_menu()
 
 def breakfast_menu():
     choice = menu("   NOW WHAT?    ", [("EAT BREAKFAST", eat_breakfast), ("WASH HANDS", wash_hands), ("GO TO BUS STOP", skip_breakfast)])
@@ -636,7 +674,7 @@ def lunch_check():
     if state["cash"] == 10000000:
         print("*KISS* THANKS! :) :) :) :) :)")
         pause()
-        print("SHE ASKS YOU TO MEET YOU AFTER SCHOOL.")
+        print("SHE ASKS YOU TO MEET HER AFTER SCHOOL.")
         pause()
         print("YES!")
         lunch_eat2()
@@ -715,7 +753,7 @@ def next_chemistry():
     print("YOU DIVE OUT OF THE WAY, AND THE ANVIL FALLS HARMLESSLY TO THE SPOT WHERE YOU WERE.")
     pause()
     print("WAIT!!")
-    pause()
+    wait(1)
     print("AN ANVIL?!?!")
     pause()
     print("YOU MAKE IT TO CLASS IN ONE PIECE.")
@@ -732,7 +770,7 @@ def donut_menu():
     choice()
 
 def donut_yes():
-    print("THE SCHOOL FOOTBALL TEAM'S BIGGEST LINEBACKER LOOKS AT YOU MENACINGLY.")
+    print("THE SCHOOL'S FOOTBALL TEAM'S BIGGEST LINEBACKER LOOKS AT YOU MENACINGLY.")
     pause()
     choice = menu("    GIVE IT?    ", [
         ("YES", donut_give),
@@ -748,6 +786,8 @@ def donut_give():
     print("YOU HAND IT TO HIM. HE EATS IT. BEFORE HE CAN BEAT YOU DOWN, HE CHOKES ON THE DONUT AND DIES.")
     pause()
     print("YOU SEARCH HIS POCKETS AND FIND A PACKET OF PURE SUGAR. OKAY.")
+    pause()
+    print("WHY LET IT GO TO WASTE. HE WON'T NEED IT ANYMORE.")
     pause()
     after_donut()
 
@@ -783,7 +823,7 @@ def walk_around():
     if state["cash"] == 10000000:
         print("YOU MEET UP WITH THE GIRL FROM LUNCH.")
         pause()
-        print("SHE'S SIGNALING FOR YOU TO GO WITH HER INTO THE JANITOR'S CLOSET WITH HER.")
+        print("SHE'S SIGNALING FOR YOU TO GO WITH HER INTO THE JANITOR'S CLOSET.")
         pause()
         print("SHE'S HOT!!! SHE LOOKS LIKE YOUR DREAM GIRL AND SHE'S ONLY WEARING A TOWEL!")
         pause()
@@ -842,11 +882,11 @@ def bus_sleep():
     bus_arrival()
 
 def bus_talk():
-    print("YOU WALK ON THE BUS AND TRY TO SAY 'WHATS UP'")
+    print("YOU WALK ON THE BUS AND TRY TO SAY \"WHATS UP\"")
     pause()
     print("BUT IT COMES OUT SOUNDING LIKE...")
     pause()
-    print("'ALL OF YOUR MOTHERS WEAR ARMY BOOTS.'")
+    print("\"ALL OF YOUR MOTHERS WEAR ARMY BOOTS.\"")
     pause()
     print("THEN THEY THROW YOU OUT THE WINDOW.")
     pause()
@@ -923,7 +963,7 @@ def airport_home():
 
 def airport_buy():
     if state["cash"] != 10000000:
-        print("YOU HAVE NO CASH")
+        print("YOU HAVE NO CASH.")
         pause()
         print("YOU SEE A CREDIT CARD ON THE FLOOR.")
         pause()
@@ -987,7 +1027,7 @@ def texas_give():
         pause()
         print("YOU TAKE IT AND START TO LEAVE, BUT HE'S NOT DONE YET.")
         pause()
-        print("HE GIVES YOU A PLANE TICKET HOME, ON AN TOP SECRET CONCORDE.")
+        print("HE GIVES YOU A PLANE TICKET HOME, ON A TOP SECRET CONCORDE.")
         pause()
         print("FLIGHT AT THE SPEED OF LIGHT!")
         pause()
@@ -1032,6 +1072,15 @@ def board_plane():
     pause()
     print("YOU CRAWL FROM THE TWISTED, BURNING WRECKAGE AND LOOK AROUND.")
     pause()
+    if state["cash"] or not state["ti-83_confiscated"]:
+        print("SEEMS LIKE YOUR LUCK IS RUNNING OUT.")
+        pause()
+        if not state["ti-83_confiscated"]:
+            print("YOUR BACKPACK IS NOWHERE TO BE FOUND.")
+            pause()
+        if state["cash"]:
+            print(f"{"" if state["ti-83_confiscated"] else "AND "}YOUR CASH IS GONE!")
+            pause()
     print("YOUR GPS TELLS YOU THAT YOU ARE NEAR ROSWELL, NM.")
     pause()
     print("YOU SEE A LARGE SIGN. IT SAYS:")
@@ -1158,7 +1207,7 @@ def area51_vent():
     pause()
     print("ALL DANCING THE YMCA!!!")
     pause()
-    print("SO THAT'S WHY YOU GOT THE URGE TO CUT YOUR WRISTS.")
+    print("AND THAT'S WHY YOU GOT THE URGE TO CUT YOUR WRISTS.")
     pause()
     print("YOU JUMP DOWN AND...")
     pause()
@@ -1209,7 +1258,7 @@ def area51_jokes():
     pause()
     print("HE FREAKS OUT AND RUNS AWAY, SCREAMING LIKE A LITTLE GIRL.")
     pause()
-    print("YOU ARE A HERO. YOU SAVED AREA51 FROM THE EVIL ALIEN SQUID CULT")
+    print("YOU ARE A HERO. YOU SAVED AREA51 FROM THE EVIL ALIEN SQUID CULT.")
     pause()
     print("BUT SINCE IT IS CLASSIFIED INFO. NO ONE WILL EVER KNOW ABOUT IT.")
     pause()
@@ -1235,9 +1284,9 @@ def area51_jokes():
     pause()
     print("...")
     pause()
-    print("WHAT THE HELL KIND OF ENDING WAS THAT?!?!")
+    print("WHAT THE HELL KIND OF CRAP ENDING WAS THAT?!?!")
     pause()
-    print("LETS TRY THAT ONE AGAIN.")
+    print("LETS TRY THAT AGAIN.")
     pause()
     print("TIME TRAVELING...")
     pause()
@@ -1249,9 +1298,9 @@ def area51_jokes():
     pause()
     print("SHE LEANS CLOSE TO YOUR EAR AND WHISPERS...")
     pause()
-    print("'YOU KNOW WHAT I WANT TO DO...'")
+    print("\"YOU KNOW WHAT I WANT TO DO...\"")
     pause()
-    print("'YEA... BUT I'M NOT REALLY IN THE MOOD.'")
+    print("\"YEA... BUT I'M NOT REALLY IN THE MOOD.\"")
     pause()
     final_menu()
 
@@ -1272,11 +1321,12 @@ def final_giveup():
 def final_scream():
     print("YOU SCREAM AS LOUD AS YOU CAN.")
     pause()
-    print("'I'M ALIVE AND I GOT A HOT CHICK. HIT ME WITH YOUR BEST SHOT, MONDAY!!!'")
+    print("\"I'M ALIVE AND I GOT A HOT CHICK. HIT ME WITH YOUR BEST SHOT, MONDAY!!!\"")
     pause()
     print("AND GUESS WHAT.")
     pause()
     print("IT DOES.")
+    wait()
     game_over()
 
 def final_dig():
@@ -1298,13 +1348,13 @@ def final_dig():
     pause()
     print("USE YOUR IMAGINATION.")
     pause()
-    print("HEHEHEHE.")
+    print("HEEHEEHEEHEE.")
     pause()
     print("A HALF HOUR LATER, YOU DRIFT OFF TO SLEEP.")
     pause()
     print("AND YOU THINK TO YOURSELF...")
     pause()
-    print("THAT DAY WAS AWESOME!")
+    print("THIS DAY WAS AWESOME!\n\n")
     pause()
     print("      ROLL\n      THE\n    CREDITS!   ")
     wait()
