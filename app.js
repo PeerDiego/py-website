@@ -64,12 +64,12 @@ js_print = globals()['js_print']
 js_input = globals()['js_input']
 
 # Override print
-def new_print(*args, **kwargs):
+def new_print(*args, msg_type='python', **kwargs):
     text = ' '.join(str(arg) for arg in args)
-    js_print(text)
+    js_print(text, msg_type)
     # Also log to browser console for debugging
     from js import console
-    console.log(f"Python print: {text}")
+    console.log(f"Python print: {text} (type: {msg_type})")
 
 # Override input - this will work with await in the async context
 async def new_input(prompt=""):
@@ -164,8 +164,8 @@ function addMessage(type, content, timestamp = null) {
 }
 
 // Display Python output
-function displayPythonOutput(text) {
-    addMessage('python', text);
+function displayPythonOutput(text, type = 'python') {
+    addMessage(type, text);
 }
 
 // Get user input (called from Python)

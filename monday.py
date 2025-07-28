@@ -21,7 +21,7 @@ try:
     CRYPTO_AVAILABLE = True
 except ImportError:
     CRYPTO_AVAILABLE = False
-    print("[NOTE] Your progress will not be saved.")
+    print("Note that progress will not be saved.", msg_type='system')
 
 def pause(prompt = "Press Enter to continue..."):
     # Print prompt, wait for Enter, then overwrite the prompt line with spaces
