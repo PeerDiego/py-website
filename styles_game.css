@@ -240,6 +240,19 @@ button:disabled {
     align-items: center;
 }
 
+/* Status running state */
+.status-running {
+    color: #0f0;  /* Neon green base color */
+    text-shadow: 0 0 1px #0f0,    /* Tighter glow */
+                0 0 2px #0f0;
+    animation: neon-pulse 5s ease-in-out infinite;
+}
+
+@keyframes neon-pulse {
+    0%, 100% { opacity: 0.8; }    /* Full brightness */
+    50% { opacity: 0.5; }      /* Less dim at lowest point */
+}
+
 #status {
     color: #0f0;
 }

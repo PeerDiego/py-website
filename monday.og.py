@@ -21,7 +21,7 @@ try:
     CRYPTO_AVAILABLE = True
 except ImportError:
     CRYPTO_AVAILABLE = False
-    print("[WARNING] Save/load is disabled: cryptography package not found. (ignore this on the website)")
+    print("[NOTE] Your progress will not be saved.")
 
 def pause(prompt = "Press Enter to continue..."):
     # Print prompt, wait for Enter, then overwrite the prompt line with spaces

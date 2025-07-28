@@ -87,7 +87,7 @@ builtins.input = new_input
 import time
 time.sleep = new_sleep
 
-print("Python environment ready!")
+print("Game loaded...")
         `);
         
         isInitialized = true;
@@ -202,7 +202,15 @@ async function runPythonProgram() {
         return;
     }
     
-    addMessage('system', 'Starting Python program...');
+    // swapping for a debug message instead
+    // addMessage('system', 'Starting Python program...');
+    debug('app.js', 'Starting Python program...');
+    // changes status message from "Python environment ready!" to "Good luck!"
+    // status.id=""; // removing #status id to let color be dictated by status-running class
+    status.textContent = 'Good luck!';
+    status.className = 'status-running';
+    status.innerHTML = 'Good luck!';
+    pythonVersion.innerHTML = 'Brought to you by <a href="http://www.lazyspaniard.com" target="_blank">Lazy Spaniard</a>'
     
     try {
         // Wrap the transformed program in an async function
