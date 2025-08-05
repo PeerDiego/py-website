@@ -184,6 +184,7 @@ builtins.load_data = load_data
 import time
 time.sleep = new_sleep
 
+PYODIDE_ENV = True
 print("Python environment ready!")
         `);
         
