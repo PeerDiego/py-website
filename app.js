@@ -22,7 +22,7 @@ import { debug, setDebugModules } from './debugUtils.js';
 
 // Configure which modules should show debug output
 setDebugModules({
-    'app.js': true,
+    'app.js': false,
     'concatenatePrints.js': false,
     'transformInputToAsync.js': false
 });
@@ -154,16 +154,11 @@ async def new_sleep(seconds):
 builtins.print = new_print
 builtins.input = new_input
 
-# Make data persistence functions available globally in Python
-builtins.js_save_data = js_save_data
-builtins.js_load_data = js_load_data
-builtins.js_clear_data = js_clear_data
+# Use JS functions directly for simple pass-throughs (they already have default parameters)
+builtins.save_data = js_save_data
+builtins.clear_data = js_clear_data
 
-# Create Python wrapper functions for better data handling
-def save_data(data, key='app_data'):
-    """Save Python data to browser cookies"""
-    return js_save_data(data, key)
-
+# Create Python wrapper function only for load_data since it does meaningful data conversion
 def load_data(key='app_data'):
     """Load data from browser cookies and convert to Python dict"""
     js_data = js_load_data(key)
@@ -182,14 +177,8 @@ def load_data(key='app_data'):
         print(f"Error converting JS data to Python: {e}")
         return None
 
-def clear_data(key='app_data'):
-    """Clear data from browser cookies"""
-    return js_clear_data(key)
-
-# Make the wrapper functions available globally
-builtins.save_data = save_data
+# Make the load_data wrapper available globally
 builtins.load_data = load_data
-builtins.clear_data = clear_data
 
 # Override time.sleep when time module is imported
 import time
@@ -228,10 +217,10 @@ async function loadPythonProgram() {
             // Transform the code to async/await style
             let transformedCode = transformPythonForPyodide(rawCode);
             console.log(`Loaded and transformed ${filename} successfully.`);
-            debug('app.js', transformedCode);
+            debug('app.js', `Transform Python code for Pyodide, pre-print-concatenation:\n${transformedCode}`);
             // Further optimize by concatenating consecutive print statements
             pythonProgram = concatenateConsecutivePrints(transformedCode);
-            debug('app.js', `Concatenate consecutive print statements successfully:\n${pythonProgram}`);
+            debug('app.js', `Transform Python code for Pyodide:\n${pythonProgram}`);
         } else {
             throw new Error(`HTTP ${response.status}`);
         }

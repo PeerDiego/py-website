@@ -67,15 +67,11 @@ def simple_cookie_test():
     except Exception as e:
         print(f"❌ Load failed: {e}")
     
-    # Test 5: Test raw JavaScript functions to see the difference
-    print("\nStep 5: Testing raw JavaScript functions...")
+    # Test 5: Test raw JavaScript load function to see the difference
+    print("\nStep 5: Testing raw JavaScript load function...")
     try:
-        print("Testing js_save_data...")
-        js_result = js_save_data({"raw": "test"}, "raw_test")
-        print(f"js_save_data result: {js_result}")
-        
-        print("Testing js_load_data...")
-        js_loaded = js_load_data("raw_test")
+        print("Testing js_load_data on the same data from Test 2...")
+        js_loaded = js_load_data("simple_test")  # Load the same data we saved in Test 2
         print(f"js_load_data result: {js_loaded}")
         print(f"Type: {type(js_loaded)}")
         
@@ -85,11 +81,17 @@ def simple_cookie_test():
             converted = js_loaded.to_py()
             print(f"Converted result: {converted}")
             print(f"Converted type: {type(converted)}")
+            
+            # Compare with load_data wrapper result
+            print("\nComparing raw js_load_data vs load_data wrapper:")
+            wrapper_result = load_data("simple_test")
+            print(f"load_data wrapper result: {wrapper_result}")
+            print(f"Results are equal: {converted == wrapper_result}")
         else:
             print("No .to_py() method available")
         
     except Exception as e:
-        print(f"❌ Raw JS functions failed: {e}")
+        print(f"❌ Raw JS load function failed: {e}")
 
 # Run the simple test
 simple_cookie_test()

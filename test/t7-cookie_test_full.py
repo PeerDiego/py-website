@@ -6,8 +6,8 @@ Tests the save/load functionality with browser cookies
 import time
 
 def test_basic_save_load():
-    """Test basic save and load functionality"""
-    print("=== Basic Save/Load Test ===")
+    """Test 1: Basic save and load functionality"""
+    print("=== Test 1: Basic Save/Load ===")
     
     # Test data
     test_data = {
@@ -25,15 +25,15 @@ def test_basic_save_load():
     
     if loaded_data:
         print(f"Successfully loaded: {loaded_data}")
-        print("✅ Basic save/load test PASSED")
+        print("✅ Test 1 PASSED")
     else:
-        print("❌ Basic save/load test FAILED - no data loaded")
+        print("❌ Test 1 FAILED - no data loaded")
     
     return loaded_data
 
 def test_multiple_keys():
-    """Test saving multiple different datasets with different keys"""
-    print("\n=== Multiple Keys Test ===")
+    """Test 2: Saving multiple different datasets with different keys"""
+    print("\n=== Test 2: Multiple Keys ===")
     
     # Save different types of data with different keys
     user_prefs = {"theme": "dark", "language": "en", "notifications": True}
@@ -61,18 +61,19 @@ def test_multiple_keys():
     
     # Verify all data was saved and loaded correctly
     if loaded_prefs and loaded_stats and loaded_settings:
-        print("✅ Multiple keys test PASSED")
+        print("✅ Test 2 PASSED")
     else:
-        print("❌ Multiple keys test FAILED")
+        print("❌ Test 2 FAILED")
     
-    return loaded_prefs, loaded_stats, loaded_settings
+    return all((loaded_prefs, loaded_stats, loaded_settings))
 
 def test_data_persistence():
-    """Test that data persists across 'sessions' (simulated with wait)"""
-    print("\n=== Data Persistence Test ===")
-    
+    """Test 3: Data persists across 'sessions' (simulated with wait)"""
+    print("\n=== Test 3: Data Persistence ===")
+
+    session_id = "session_123"
     session_data = {
-        "session_id": "session_123",
+        "session_id": session_id,
         "start_time": "2025-08-04 10:30:00",
         "user_actions": ["login", "view_dashboard", "edit_profile"]
     }
@@ -86,17 +87,17 @@ def test_data_persistence():
     print("Loading session data after time passage...")
     loaded_session = load_data("session_data")
     
-    if loaded_session and loaded_session.get("session_id") == "session_123":
+    if loaded_session and loaded_session.get("session_id") == session_id:
         print(f"Session data persisted: {loaded_session}")
-        print("✅ Data persistence test PASSED")
+        print("✅ Test 3 PASSED")
     else:
-        print("❌ Data persistence test FAILED")
+        print("❌ Test 3 FAILED")
     
     return loaded_session
 
 def test_data_modification():
-    """Test modifying and re-saving data"""
-    print("\n=== Data Modification Test ===")
+    """Test 4: Modifying and re-saving data"""
+    print("\n=== Test 4: Data Modification ===")
     
     # Start with initial data
     progress_data = {
@@ -125,15 +126,15 @@ def test_data_modification():
         loaded_progress.get("current_level") == 2 and 
         loaded_progress.get("experience") == 150 and
         "First Level Complete" in loaded_progress.get("achievements", [])):
-        print("✅ Data modification test PASSED")
+        print("✅ Test 4 PASSED")
     else:
-        print("❌ Data modification test FAILED")
+        print("❌ Test 4 FAILED")
     
     return loaded_progress
 
 def test_clear_data():
-    """Test clearing specific data"""
-    print("\n=== Clear Data Test ===")
+    """Test 5: Clearing specific data"""
+    print("\n=== Test 5: Clear Data ===")
     
     # Save some temporary data
     temp_data = {"temp_value": "delete_me"}
@@ -153,15 +154,15 @@ def test_clear_data():
     print(f"Data after clearing: {cleared_data}")
     
     if cleared_data is None:
-        print("✅ Clear data test PASSED")
+        print("✅ Test 5 PASSED")
     else:
-        print("❌ Clear data test FAILED - data still exists")
+        print("❌ Test 5 FAILED - data still exists")
     
     return cleared_data
 
 def test_default_key():
-    """Test using the default key parameter"""
-    print("\n=== Default Key Test ===")
+    """Test 6: Using the default key parameter"""
+    print("\n=== Test 6: Default Key ===")
     
     default_data = {"using_default_key": True, "value": 999}
     
@@ -174,9 +175,9 @@ def test_default_key():
     print(f"Loaded with default key: {loaded_default}")
     
     if loaded_default and loaded_default.get("using_default_key") == True:
-        print("✅ Default key test PASSED")
+        print("✅ Test 6 PASSED")
     else:
-        print("❌ Default key test FAILED")
+        print("❌ Test 6 FAILED")
     
     return loaded_default
 
@@ -215,7 +216,7 @@ def run_all_tests():
     total = 6
     
     if results['basic']: passed += 1
-    if results['multiple'][0]: passed += 1  # Check if first item loaded successfully
+    if results['multiple']: passed += 1  # Check if first item loaded successfully
     if results['persistence']: passed += 1
     if results['modification']: passed += 1
     if results['clear'] is None: passed += 1  # None means it was cleared successfully
