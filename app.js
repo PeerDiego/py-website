@@ -22,9 +22,9 @@ import { debug, setDebugModules } from './debugUtils.js';
 
 // Configure which modules should show debug output
 setDebugModules({
-    'app.js': true,
+    'app.js': false,
     'concatenatePrints.js': false,
-    'transformInputToAsync.js': true
+    'transformInputToAsync.js': false
 });
 
 // DOM elements
@@ -35,6 +35,67 @@ const runScriptButton = document.getElementById('run-script-button');
 const clearButton = document.getElementById('clear-button');
 const status = document.getElementById('status');
 const pythonVersion = document.getElementById('python-version');
+
+// Cookie utility functions
+function setCookie(name, value, days = 30) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${JSON.stringify(value)};expires=${expires.toUTCString()};path=/`;
+}
+
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) {
+            try {
+                return JSON.parse(c.substring(nameEQ.length, c.length));
+            } catch(e) {
+                return null;
+            }
+        }
+    }
+    return null;
+}
+
+function deleteCookie(name) {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+}
+
+// Data persistence bridge functions
+function saveAppData(data, key = 'app_data') {
+    // Convert Python object to JavaScript object if needed
+    let jsData;
+    if (data && typeof data.toJs === 'function') {
+        // If it's a PyProxy object with toJs method, convert it
+        // Use Object.fromEntries to convert Map to plain Object for JSON serialization
+        jsData = data.toJs({dict_converter: Object.fromEntries});
+    } else {
+        // Otherwise assume it's already a JavaScript object
+        jsData = data;
+    }
+    
+    setCookie(key, jsData);
+    console.log(`App data saved to cookie (${key}):`, jsData);
+    return true; // Return success indicator
+}
+
+function loadAppData(key = 'app_data') {
+    const savedData = getCookie(key);
+    console.log(`App data loaded from cookie (${key}):`, savedData);
+    
+    // Return the data as-is - it should be a proper JavaScript object
+    // that Python can convert using .to_py()
+    return savedData;
+}
+
+function clearAppData(key = 'app_data') {
+    deleteCookie(key);
+    console.log(`App data cleared from cookie (${key})`);
+    return true; // Return success indicator
+}
 
 // Initialize Pyodide
 async function initializePyodide() {
@@ -55,6 +116,11 @@ async function initializePyodide() {
         pyodide.globals.set('js_print', displayPythonOutput);
         pyodide.globals.set('js_input', getUserInput);
         
+        // Set up data persistence functions (for cookie save/load)
+        pyodide.globals.set('js_save_data', saveAppData);
+        pyodide.globals.set('js_load_data', loadAppData);
+        pyodide.globals.set('js_clear_data', clearAppData);
+        
         await pyodide.runPythonAsync(`
 import builtins
 import asyncio
@@ -62,6 +128,11 @@ import asyncio
 # Get JS functions
 js_print = globals()['js_print']
 js_input = globals()['js_input']
+
+# Get data persistence functions
+js_save_data = globals()['js_save_data']
+js_load_data = globals()['js_load_data']
+js_clear_data = globals()['js_clear_data']
 
 # Override print
 def new_print(*args, msg_type='python', **kwargs):
@@ -83,10 +154,37 @@ async def new_sleep(seconds):
 builtins.print = new_print
 builtins.input = new_input
 
+# Use JS functions directly for simple pass-throughs (they already have default parameters)
+builtins.save_data = js_save_data
+builtins.clear_data = js_clear_data
+
+# Create Python wrapper function only for load_data since it does meaningful data conversion
+def load_data(key='app_data'):
+    """Load data from browser cookies and convert to Python dict"""
+    js_data = js_load_data(key)
+    if js_data is None:
+        return None
+    
+    # Convert JsProxy to Python object using to_py()
+    try:
+        # Check if it's a JsProxy object with to_py method
+        if hasattr(js_data, 'to_py'):
+            return js_data.to_py()
+        else:
+            # If it's already a Python object, return as-is
+            return js_data
+    except Exception as e:
+        print(f"Error converting JS data to Python: {e}")
+        return None
+
+# Make the load_data wrapper available globally
+builtins.load_data = load_data
+
 # Override time.sleep when time module is imported
 import time
 time.sleep = new_sleep
 
+PYODIDE_ENV = True
 print("Game loaded...")
         `);
         
@@ -120,10 +218,10 @@ async function loadPythonProgram() {
             // Transform the code to async/await style
             let transformedCode = transformPythonForPyodide(rawCode);
             console.log(`Loaded and transformed ${filename} successfully.`);
-            debug('app.js', transformedCode);
+            debug('app.js', `Transform Python code for Pyodide, pre-print-concatenation:\n${transformedCode}`);
             // Further optimize by concatenating consecutive print statements
             pythonProgram = concatenateConsecutivePrints(transformedCode);
-            debug('app.js', `Concatenate consecutive print statements successfully:\n${pythonProgram}`);
+            debug('app.js', `Transform Python code for Pyodide:\n${pythonProgram}`);
         } else {
             throw new Error(`HTTP ${response.status}`);
         }

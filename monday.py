@@ -15,13 +15,22 @@ import time
 import base64
 import hashlib
 
+# Check if we're running in Pyodide browser environment
+try:
+    PYODIDE_ENV = globals().get('PYODIDE_ENV', False)
+    print("Running in Pyodide environment." if PYODIDE_ENV else "Running in standard Python environment.")
+except NameError:
+    print("Assuming standard Python environment.")
+    PYODIDE_ENV = False
+
 # Try to import cryptography, else disable save/load
 try:
     from cryptography.fernet import Fernet, InvalidToken
     CRYPTO_AVAILABLE = True
 except ImportError:
     CRYPTO_AVAILABLE = False
-    print("Note that progress will not be saved.", msg_type='system')
+    if PYODIDE_ENV:
+        print("Note that progress will not be saved.", msg_type='system')
 
 def pause(prompt = "Press Enter to continue..."):
     # Print prompt, wait for Enter, then overwrite the prompt line with spaces
@@ -80,35 +89,71 @@ def get_fernet():
     return Fernet(base64.urlsafe_b64encode(key))
 
 def save_stats():
-    if not CRYPTO_AVAILABLE:
-        return
-    f = get_fernet()
-    stats = [
-        state["times_played"],
-        state["times_won"],
-        state["times_good_ending"]
-    ]
-    data = ",".join(str(x) for x in stats).encode()
-    token = f.encrypt(data)
-    with open(SAVE_FILE, "wb") as file:
-        file.write(token)
+    """Save game statistics to persistent storage"""
+    if PYODIDE_ENV:
+        # Use browser's localStorage via Pyodide bridge
+        stats = {
+            "times_played": state["times_played"],
+            "times_won": state["times_won"],
+            "times_good_ending": state["times_good_ending"]
+        }
+        save_data(stats, "monday_stats")
+    else:
+        # Use local file encryption
+        if not CRYPTO_AVAILABLE:
+            return
+        f = get_fernet()
+        stats = [
+            state["times_played"],
+            state["times_won"],
+            state["times_good_ending"]
+        ]
+        data = ",".join(str(x) for x in stats).encode()
+        token = f.encrypt(data)
+        with open(SAVE_FILE, "wb") as file:
+            file.write(token)
 
 def load_stats():
-    if not CRYPTO_AVAILABLE or not os.path.exists(SAVE_FILE):
-        return
-    f = get_fernet()
-    try:
-        with open(SAVE_FILE, "rb") as file:
-            token = file.read()
-        data = f.decrypt(token).decode()
-        stats = [int(x) for x in data.split(",")]
-        state["times_played"] = stats[0]
-        state["times_won"] = stats[1]
-        state["times_good_ending"] = stats[2]
-    except Exception:
-        state["times_played"] = 0
-        state["times_won"] = 0
-        state["times_good_ending"] = 0
+    """Load game statistics from persistent storage"""
+    if PYODIDE_ENV:
+        # Load from browser's localStorage
+        stats = load_data("monday_stats")
+        if stats:
+            state["times_played"] = stats.get("times_played", 0)
+            state["times_won"] = stats.get("times_won", 0)
+            state["times_good_ending"] = stats.get("times_good_ending", 0)
+    else:
+        # Load from encrypted local file
+        if not CRYPTO_AVAILABLE or not os.path.exists(SAVE_FILE):
+            return
+        try:
+            f = get_fernet()
+            with open(SAVE_FILE, "rb") as file:
+                token = file.read()
+            data = f.decrypt(token).decode()
+            stats = [int(x) for x in data.split(",")]
+            state["times_played"] = stats[0]
+            state["times_won"] = stats[1]
+            state["times_good_ending"] = stats[2]
+        except Exception:
+            state["times_played"] = 0
+            state["times_won"] = 0
+            state["times_good_ending"] = 0
+
+def clear_stats():
+    """Clear game statistics from persistent storage"""
+    if PYODIDE_ENV:
+        # Clear browser storage
+        clear_data("monday_stats")
+    else:
+        # Delete local save file
+        if os.path.exists(SAVE_FILE):
+            os.remove(SAVE_FILE)
+    
+    # Reset state
+    state["times_played"] = 0
+    state["times_won"] = 0
+    state["times_good_ending"] = 0
 
 def title_screen():
     print("\nA MODERN ADVENTURE OF EPIC PROPORTIONS")
@@ -125,6 +170,7 @@ def main_menu():
             ("HINTS", hints),
             ("POINTLESS INFO.", pointless_info),
             ("ABOUT", about),
+            ("CLEAR STATS", clear_stats),
             ("QUIT GAME", quit_game)
         ])
         await choice()
