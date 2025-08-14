@@ -214,6 +214,9 @@ print("Python environment ready!")
         
         addMessage('system', 'Python environment initialized successfully! Click "Run Python Program" to start the interactive program.');
         
+        // Focus the run button and add keyboard listener
+        runScriptButton.focus();
+        
     } catch (error) {
         console.error('Initialization error:', error);
         status.textContent = 'Failed to load Python environment';
