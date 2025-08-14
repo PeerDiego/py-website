@@ -1,3 +1,8 @@
+:root {
+    --input-type: 'numeric';
+    --auto-accept-numeric-input: 'true';
+}
+
 * {
     margin: 0;
     padding: 0;

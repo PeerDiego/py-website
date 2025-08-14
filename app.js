@@ -5,12 +5,26 @@ let pythonProgram = '';
 let isWaitingForInput = false;
 let inputResolver = null;
 
-// Check if we're using the game CSS (as opposed to chat CSS)
-const isGameMode = document.querySelector('link[href*="styles_game"]') !== null;
-if (isGameMode) {
+// Get CSS custom properties for input configuration
+const computedStyle = getComputedStyle(document.documentElement);
+const inputType = computedStyle.getPropertyValue('--input-type').trim().replace(/['"]/g, '');
+const autoAcceptNumeric = computedStyle.getPropertyValue('--auto-accept-numeric-input').trim().replace(/['"]/g, '') === 'true';
+
+// Configure input based on CSS properties
+if (inputType === 'numeric') {
     const userInput = document.getElementById('user-input');
     userInput.setAttribute('inputmode', 'numeric');
     userInput.setAttribute('pattern', '[0-9]*');
+    
+    // Only add auto-submit if auto-accept-numeric-input is enabled
+    if (autoAcceptNumeric) {
+        userInput.addEventListener('input', function(e) {
+            const value = e.target.value;
+            if (/^\d+$/.test(value)) {  // Check if input is numeric
+                sendButton.click();  // Automatically trigger send
+            }
+        });
+    }
 }
 
 // Import from the transformInputToAsync module
