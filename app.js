@@ -213,6 +213,9 @@ print("Game loaded...")
         userInput.placeholder = 'Type a message...';
         
         addMessage('system', 'Python environment initialized successfully! Click "Play Game" to start the interactive game.');
+
+        // Focus the run button and add keyboard listener
+        runScriptButton.focus();
         
     } catch (error) {
         console.error('Initialization error:', error);
