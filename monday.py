@@ -1,29 +1,42 @@
 """
-Python text adventure: MONDAY
-Converted from TI-BASIC by GitHub Copilot
+MONDAY - A Text Adventure Game
+Originally written in TI-BASIC, converted to Python
+Copyright (c) 2001, 2025
+
+A humorous adventure where you try to survive a Monday morning at high school.
+Make increasingly bizarre choices while trying to make it through what might 
+be the worst Monday ever. Features multiple endings, dark humor, and 
+callbacks to classic 90's pop culture.
 
 Features:
-- Menus and choices via input()
-- Print for all narrative and UI
-- Game state tracked with variables and lists
-- Humor and tone preserved
+- Choice-based gameplay with branching paths
+- Multiple endings including a secret "good" ending
+- Persistent stats and achievements
+- Modern Python implementation with save functionality
 """
 
+#---------------------------------------
+# Core Imports
+#---------------------------------------
 import os
 import sys
 import time
+import json
 import base64
 import hashlib
 
-# Check if we're running in Pyodide browser environment
+#---------------------------------------
+# Optional Features & Environment Setup
+#---------------------------------------
+# Check for Pyodide (browser) environment
 try:
     PYODIDE_ENV = globals().get('PYODIDE_ENV', False)
-    print("Running in Pyodide environment." if PYODIDE_ENV else "Running in standard Python environment.")
+    # print("Running in Pyodide environment." if PYODIDE_ENV else "Running in standard Python environment.")
 except NameError:
     print("Assuming standard Python environment.")
     PYODIDE_ENV = False
 
-# Try to import cryptography, else disable save/load
+# Setup save/load capability
 try:
     from cryptography.fernet import Fernet, InvalidToken
     CRYPTO_AVAILABLE = True
@@ -32,96 +45,124 @@ except ImportError:
     if PYODIDE_ENV:
         print("Note that progress will not be saved.", msg_type='system')
 
-def pause(prompt = "Press Enter to continue..."):
-    # Print prompt, wait for Enter, then overwrite the prompt line with spaces
-    input(prompt)  # Removed the \n to keep the prompt on same line
-    # Move cursor up one line and clear it - not needed for web version
-    # sys.stdout.write("\033[F")  # Move cursor up one line
-    # sys.stdout.write(" " * len(prompt) + "\r")  # Overwrite with spaces
-    # sys.stdout.flush()
-
-def wait(s=2.0):
-    time.sleep(s)
-
-# Game state dictionary - maintains state across different functions
-# This is a workaround for the limitations of Pyodide's handling of global variables
+#---------------------------------------
+# Game State Management
+#---------------------------------------
 state = {
-    # Statistics tracking (formerly LMNDY list)
+    # Core Statistics
     "times_played"      : 0,  # Number of times game has been played
     "times_won"         : 0,  # Number of times player has won
     "times_good_ending" : 0,  # Number of times player got the good ending
+    "hints_seen"        : 0,  # Number of unique hints the player has viewed
+    "total_choices"     : 0,  # Total number of choices made
 }
-def initialize_state():
-    """Initialize the game state with default values."""
+
+def reset_saved_stats():
+    state["times_played"]      = 0
+    state["times_won"]         = 0
+    state["times_good_ending"] = 0
+    state["hints_seen"]        = 0
+    state["total_choices"]     = 0
+
+def initialize_game_state():
+    """Reset the game state to default values for a new game."""
     state["running"] = True
     state["snooze_count"] = 0
     state["pants_wet"] = False
     state["cash"] = 0
-    state["ti-83_confiscated"] = False  # True if confiscated, False if player has it
+    state["ti-83_confiscated"] = False
     state["has_money"] = False
     state["insists_on_going_home"] = 0  # insists on going home at end of day; bypass win route
-initialize_state()
+initialize_game_state()
 
+#---------------------------------------
+# Core Game Utilities
+#---------------------------------------
 
-def menu(title, options):
+def pause(prompt = "Press Enter to continue..."):
+    # Print prompt, wait for Enter, then overwrite the prompt line with spaces
+    input(prompt)  # Removed the \n to keep the prompt on same line
+    # Move cursor up one line and clear it - not needed for web version
+    if not PYODIDE_ENV:
+        sys.stdout.write("\033[F")  # Move cursor up one line
+        sys.stdout.write(" " * len(prompt) + "\r")  # Overwrite with spaces
+        sys.stdout.flush()
+
+def wait(s=2.0):
+    """Wait for specified number of seconds."""
+    time.sleep(s)
+
+def menu(title, options, count_choice=True):
     menu_text = f"\n{title}"
     for i, (label, _) in enumerate(options, 1):
         menu_text += f"\n  {i}. {label}"
     print(menu_text, "\n\n")
+    
     while state["running"]:
         try:
             choice = int(input("Choose: "))
             if 1 <= choice <= len(options):
+                if count_choice:
+                    state["total_choices"] += 1  # Increment choice counter
+                    save_stats()  # Save progress
                 return options[choice-1][1]
         except ValueError:
             pass
         print("Invalid choice. Try again.")
 
-
+#---------------------------------------
+# File Save/Load System Configuration
+#---------------------------------------
 SAVE_FILE = "monday_save.dat"
-SECRET = "monday_secret_key_2025"  # Change this to something unique for your game
+SECRET = "monday_secret_key_2025"
+
+# List of state keys that should be saved/loaded
+SAVEABLE_STATS = [
+    "times_played",
+    "times_won",
+    "times_good_ending",
+    "hints_seen",
+    "total_choices"
+]
 
 def get_fernet():
+    """Initialize encryption for save files."""
     if not CRYPTO_AVAILABLE:
         raise RuntimeError("Cryptography not available")
     # Derive a 32-byte key from SECRET
     key = hashlib.sha256(SECRET.encode()).digest()
     return Fernet(base64.urlsafe_b64encode(key))
 
+
+#---------------------------------------
+# Save/Load System Implementation 
+#---------------------------------------
+
 def save_stats():
     """Save game statistics to persistent storage"""
+    # Prepare the stats to be saved
+    saveable_data = {k: state[k] for k in SAVEABLE_STATS}
+    
     if PYODIDE_ENV:
         # Use browser's localStorage via Pyodide bridge
-        stats = {
-            "times_played": state["times_played"],
-            "times_won": state["times_won"],
-            "times_good_ending": state["times_good_ending"]
-        }
-        save_data(stats, "monday_stats")
+        save_data(saveable_data, "monday_stats")
     else:
         # Use local file encryption
         if not CRYPTO_AVAILABLE:
             return
         f = get_fernet()
-        stats = [
-            state["times_played"],
-            state["times_won"],
-            state["times_good_ending"]
-        ]
-        data = ",".join(str(x) for x in stats).encode()
+        data = json.dumps(saveable_data).encode()
         token = f.encrypt(data)
         with open(SAVE_FILE, "wb") as file:
             file.write(token)
 
 def load_stats():
     """Load game statistics from persistent storage"""
+    loaded_state = {}
+    
     if PYODIDE_ENV:
         # Load from browser's localStorage
-        stats = load_data("monday_stats")
-        if stats:
-            state["times_played"] = stats.get("times_played", 0)
-            state["times_won"] = stats.get("times_won", 0)
-            state["times_good_ending"] = stats.get("times_good_ending", 0)
+        loaded_state = load_data("monday_stats") or {}
     else:
         # Load from encrypted local file
         if not CRYPTO_AVAILABLE or not os.path.exists(SAVE_FILE):
@@ -131,30 +172,42 @@ def load_stats():
             with open(SAVE_FILE, "rb") as file:
                 token = file.read()
             data = f.decrypt(token).decode()
-            stats = [int(x) for x in data.split(",")]
-            state["times_played"] = stats[0]
-            state["times_won"] = stats[1]
-            state["times_good_ending"] = stats[2]
+            try:
+                # Try loading as JSON first
+                loaded_state = json.loads(data)
+            except json.JSONDecodeError:
+                # Fall back to old CSV format
+                stats = [int(x) for x in data.split(",")]
+                loaded_state = {
+                    "times_played": stats[0],
+                    "times_won": stats[1],
+                    "times_good_ending": stats[2],
+                    "hints_seen": stats[3] if len(stats) > 3 else 0,
+                    "total_choices": stats[4] if len(stats) > 4 else 0
+                }
         except Exception:
-            state["times_played"] = 0
-            state["times_won"] = 0
-            state["times_good_ending"] = 0
+            reset_saved_stats()
+            return
+            
+    # Update state with loaded values
+    for key in SAVEABLE_STATS:
+        if key in loaded_state:
+            state[key] = loaded_state[key]
 
 def clear_stats():
     """Clear game statistics from persistent storage"""
+    reset_saved_stats()
     if PYODIDE_ENV:
         # Clear browser storage
         clear_data("monday_stats")
+        print("Save cleared.", msg_type='system')
+        wait(1) # Needed for Pyodide to process to comply with menu()'s `await choice()``
     else:
         # Delete local save file
         if os.path.exists(SAVE_FILE):
             os.remove(SAVE_FILE)
+        print("Save cleared.")
     
-    # Reset state
-    state["times_played"] = 0
-    state["times_won"] = 0
-    state["times_good_ending"] = 0
-
 def title_screen():
     print("\nA MODERN ADVENTURE OF EPIC PROPORTIONS")
     wait()
@@ -168,11 +221,11 @@ def main_menu():
             ("PLAY GAME", play_game),
             ("BACKGROUND", background),
             ("HINTS", hints),
-            ("POINTLESS INFO.", pointless_info),
+            ("POINTLESS INFO", pointless_info),
             ("ABOUT", about),
             ("CLEAR STATS", clear_stats),
             ("QUIT GAME", quit_game)
-        ])
+        ], count_choice=False)
         await choice()
     print("Thanks for playing!")
 
@@ -183,52 +236,67 @@ def pointless_info():
     wait(1)
     print(f"YOU HAVE WON {state['times_won']} TIME(S).", 
           " >_> <_<" if state['times_won'] > state['times_played'] else "")
+    wait(1)
+    if state["hints_seen"]:
+            print(F"YOU HAVE VIEWED {'ONLY ONE' if state['hints_seen'] == 1 else state['hints_seen']} HINT{'' if state['hints_seen'] == 1 else 'S'}.")
     wait(1.5)
     if state['times_good_ending'] > 0:
         print(f"YOU HAVE ACTUALLY WON {state['times_good_ending']} TIME(S).")
     elif state['times_won'] == 0:
         print("KEEP ON TRYING.")
-    elif state['times_won'] == 1:
+    elif state['times_won'] or state['times_played']:
         print("YOU'RE GETTING THE HANG OF IT.")
     wait(1)
     # Return to main menu
 
 def hints():
-    choice = menu("  WANT A HINT?  ", [("YES", hint_yes), ("NO", main_menu)])
+    choice = menu("  WANT A HINT?  ", [("YES", hint_yes), ("NO", main_menu)], count_choice=False)
     await choice()
 
 def hint_yes():
+    if state["hints_seen"] < 1:
+        state["hints_seen"] = 1
+        save_stats()  # Save progress after seeing new hint
     print("KEEP THIS IN MIND:")
     pause()
     print("YOU WON'T ALWAYS FIND OUT IF YOU MADE THE WRONG CHOICE RIGHT AWAY.")
     pause()
     print("SOME DECISIONS WON'T AFFECT YOU UNTIL LATER ON.")
     pause()
-    print("  MUHUWAHAHAHA")
+    print("...MUHUWAHAHAHA")
     wait()
-    choice = menu("WANT MORE HINTS?", [("YEA", hint_yes_two), ("NOPE", main_menu)])
+    choice = menu("WANT MORE HINTS?", [("YEA", hint_yes_two), ("NOPE", main_menu)], count_choice=False)
     await choice()
 
 def hint_yes_two():
+    if state["hints_seen"] < 2:
+        state["hints_seen"] = 2
+        save_stats()  # Save progress after seeing new hint
     print("PERSEVERANCE AND GRIT ARE GOOD QUALITIES.")
     wait(1)
-    choice = menu("MORE HINTS?", [("YES PLEASE", hint_yes_three), ("NO, I'LL FLEX MY GRIT", main_menu)])
+    choice = menu("MORE HINTS?", [("YES PLEASE", hint_yes_three), ("NO, I'LL FLEX MY GRIT", main_menu)], count_choice=False)
     await choice()
 
 def hint_yes_three():
+    if state["hints_seen"] < 3:
+        state["hints_seen"] = 3
+        save_stats()  # Save progress after seeing new hint
     print("SOME CHOICES ARE NOT AS OBVIOUS AS THEY SEEM.")
     pause()
     print("SOMETIMES YOU HAVE TO THINK OUTSIDE THE BOX.")
     pause()
     print("OR MAYBE JUST THINK AT ALL.")
     wait()
-    choice = menu("EVEN MORE HINTS?", [("YEA, I'M DESPERATE", hint_yes_four), ("NAW DUDE, I'M GOOD", main_menu)])
+    choice = menu("EVEN MORE HINTS?", [("YEA, I'M DESPERATE", hint_yes_four), ("NAW DUDE, I'M GOOD", main_menu)], count_choice=False)
     await choice()
 
 def hint_yes_four():
+    if state["hints_seen"] < 4:
+        state["hints_seen"] = 4
+        save_stats()  # Save progress after seeing new hint
     print("MONEY IS THE ROOT OF ALL THAT KILLS.")
     wait(3)
-    choice = menu("WANT EVEN MORE HINTS!? HMM???", [("YES, JUST SPOON FEED ME PLEASE", hint_loser), ("NO, I WILL THINK FOR MYSELF. THANKS", main_menu)])
+    choice = menu("WANT EVEN MORE HINTS!? HMM???", [("YES, JUST SPOON FEED ME PLEASE", hint_loser), ("NO, I WILL THINK FOR MYSELF. THANKS", main_menu)], count_choice=False)
     await choice()
 
 def hint_loser():
@@ -297,7 +365,7 @@ def credits():
         "                THE END?"
     ]
     # Number of lines to show at once (like a movie credits window)
-    window = 22
+    window = 30
     # Pad with empty lines at the top and bottom for effect
     pad = ["" for _ in range(window)]
     scroll_lines = pad + credits_lines + pad
@@ -310,9 +378,20 @@ def credits():
         # Print the current window
         for line in scroll_lines[i:i+window]:
             print(line)
-        wait(0.8)
+        wait(0.5 if PYODIDE_ENV else 0.8)
     state["times_won"] += 1
     save_stats()
+    if state["times_good_ending"]:
+        print()
+        if state["hints_seen"] == 0:
+            print("WE WANTED TO TAKE A MOMENT TO COMMEND YOU ON YOUR GRIT AND PERSERVERENCE",
+                "\nWHICH YOU UTILIZED TO THEIR FULLEST TO COMLETE MONDAY WITHOUT *ANY* HINTS!",
+                "\n\n\tWELL DONE CHAMP! (GOLF CLAP)")
+        elif state["hints_seen"] < 4:
+            print("CONGRATS, YOU WON WITHOUT PEEKING AT ALL THE HINTS!",
+                  "\nEITHER YOU'RE LUCKY, A GENIUS, OR YOU REALLY NEED TO GET OUT MY HEAD.")
+        print()
+        pause()
     # quit_game()
 
 def quit_game():
@@ -337,7 +416,7 @@ def debug_bypass():
 
 def play_game():
     state["times_played"] += 1
-    initialize_state()
+    initialize_game_state()
     debug_bypass()
     print("YOU'RE IN BED, ASLEEP.")
     pause()
@@ -564,7 +643,7 @@ def where_to_online():
     await choice()
 
 def cia_gov():
-    print("YOU MISTAKENLY FIND GOVERNMENT SECRETS AND YOU ARE LATER KILLED 'ACCIDENTALLY'. WHEN AN ANVIL IS DROPPED ON YOUR HEAD.")
+    print("YOU MISTAKENLY FIND GOVERNMENT SECRETS AND YOU ARE LATER KILLED \"ACCIDENTALLY\". WHEN AN ANVIL IS DROPPED ON YOUR HEAD.")
     game_over()
 
 def hentai_site():
@@ -1413,9 +1492,6 @@ def game_over():
     pause()
     main_menu()
 
-# if __name__ == "__main__": # trying out copilot's solution to SyntaxError: 'await' outside async function
-def da_game():
+if __name__ == "__main__":
     load_stats()
     title_screen()
-
-da_game()
