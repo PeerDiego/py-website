@@ -55,6 +55,7 @@ state = {
     "times_good_ending" : 0,  # Number of times player got the good ending
     "hints_seen"        : 0,  # Number of unique hints the player has viewed
     "total_choices"     : 0,  # Total number of choices made
+    "choices_count"     : 0,  # Choices made in current session
 }
 
 def reset_saved_stats():
@@ -79,7 +80,7 @@ initialize_game_state()
 # Core Game Utilities
 #---------------------------------------
 
-def pause(prompt = "Press Enter to continue..."):
+def pause(prompt = "Press Send to continue..."):
     # Print prompt, wait for Enter, then overwrite the prompt line with spaces
     input(prompt)  # Removed the \n to keep the prompt on same line
     # Move cursor up one line and clear it - not needed for web version
@@ -103,7 +104,8 @@ def menu(title, options, count_choice=True):
             choice = int(input("Choose: "))
             if 1 <= choice <= len(options):
                 if count_choice:
-                    state["total_choices"] += 1  # Increment choice counter
+                    state["choices_count"] += 1  # Increment choice counter
+                    state["total_choices"] += 1  # Increment perma choice counter
                     save_stats()  # Save progress
                 return options[choice-1][1]
         except ValueError:
@@ -234,6 +236,19 @@ def pointless_info():
     pause()
     print(f"YOU HAVE PLAYED THIS GAME {state['times_played']} TIME{'' if state['times_played'] == 1 else 'S'}.")
     wait(1)
+    if state["times_played"] == 0:
+        print("WHAT ARE YOU WAITING FOR? START THE GAME.")
+        if state["hints_seen"]:
+            wait()
+            print("\nWAIT! YOU CHECKED OUT HINTS BEFORE EVEN TRYING THE GAME?? HOW LAME. ┑(￣Д ￣)┍")
+            wait(4)
+        return
+    if state["choices_count"]:
+        print(F"YOU HAVE MADE {state['choices_count']} CHOICE{'' if state['choices_count'] == 1 else 'S'} THIS ROUND.")
+    wait(1)
+    if state["total_choices"] and state["total_choices"] != state["choices_count"]:
+        print(F"YOU HAVE MADE {state['total_choices']} CHOICE{'' if state['total_choices'] == 1 else 'S'}{', IN TOTAL' if state['choices_count'] != 0 else ''}.")
+    wait(1)
     print(f"YOU HAVE WON {state['times_won']} TIME{'' if state['times_won'] == 1 else 'S'}.", 
           " >_> <_<" if state['times_won'] > state['times_played'] else "")
     wait(1)
@@ -242,8 +257,10 @@ def pointless_info():
     wait(1.5)
     if state['times_good_ending'] > 0:
         print(f"YOU HAVE ACTUALLY WON {state['times_good_ending']} TIME(S).")
-    elif state['times_won'] == 0:
+    elif state['times_played'] and state['times_won'] == 0:
         print("KEEP ON TRYING.")
+    elif state['total_choices'] > 20:
+        print("YOU'RE WELL ON YOUR WAY. KEEP GOING!")
     elif state['times_won'] or state['times_played']:
         print("YOU'RE GETTING THE HANG OF IT.")
     wait(1)

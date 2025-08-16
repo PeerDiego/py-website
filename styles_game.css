@@ -116,6 +116,7 @@ header p {
     background: #333;  /* Slightly lighter than background */
     color: #aaa;  /* Muted color */
     font-style: italic;
+    font-size: 0.8em;  /* Slightly smaller than regular text */
     border-left: 4px solid #555;
     padding: 8px 8px;
 }
@@ -340,7 +341,7 @@ button:disabled {
     }
 
     .system-message .message-content {
-        font-size: 13px;
+        font-size: calc(0.8em * 14px / 16px);  /* Maintain the same relative size as non-mobile */
         padding: 6px 8px;
     }
 
@@ -396,7 +397,7 @@ button:disabled {
     }
 
     .system-message .message-content {
-        font-size: 13px;
+        font-size: calc(0.8em * 15px / 16px);  /* Maintain the same relative size */
     }
 
     .chat-output {

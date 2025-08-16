@@ -212,7 +212,7 @@ print("Game loaded...")
         runScriptButton.disabled = false;
         userInput.placeholder = 'Type a message...';
         
-        addMessage('system', 'Python environment initialized successfully! Click "Play Game" to start the interactive game.');
+        addMessage('system', 'Python environment initialized successfully! Click "Play Game" to start.');
 
         // Focus the run button and add keyboard listener
         runScriptButton.focus();
