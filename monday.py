@@ -232,9 +232,11 @@ def main_menu():
     print("Thanks for playing!")
 
 def pointless_info():
+    def once_or_x_times(integer):
+        return "ONCE." if integer == 1 else f"{integer} TIMES."
     print("\nHERE'S SOME USELESS INFORMATION.")
     pause()
-    print(f"YOU HAVE PLAYED THIS GAME {state['times_played']} TIME{'' if state['times_played'] == 1 else 'S'}.")
+    print("YOU HAVE PLAYED THIS GAME", once_or_x_times(state["times_played"]))
     wait(1)
     if state["times_played"] == 0:
         print("WHAT ARE YOU WAITING FOR? START THE GAME.")
@@ -249,19 +251,28 @@ def pointless_info():
     if state["total_choices"] and state["total_choices"] != state["choices_count"]:
         print(F"YOU HAVE MADE {state['total_choices']} CHOICE{'' if state['total_choices'] == 1 else 'S'}{', IN TOTAL' if state['choices_count'] != 0 else ''}.")
     wait(1)
-    print(f"YOU HAVE WON {state['times_won']} TIME{'' if state['times_won'] == 1 else 'S'}.", 
+    print(f"YOU HAVE WON", once_or_x_times(state["times_won"]), 
           " >_> <_<" if state['times_won'] > state['times_played'] else "")
     wait(1)
     if state["hints_seen"]:
             print(F"YOU HAVE VIEWED {'ONLY ONE' if state['hints_seen'] == 1 else state['hints_seen']} HINT{'' if state['hints_seen'] == 1 else 'S'}.")
     wait(1.5)
     if state['times_good_ending'] > 0:
-        print(f"YOU HAVE ACTUALLY WON {state['times_good_ending']} TIME(S).")
-    elif state['times_played'] and state['times_won'] == 0:
-        print("KEEP ON TRYING.")
-    elif state['total_choices'] > 20:
-        print("YOU'RE WELL ON YOUR WAY. KEEP GOING!")
-    elif state['times_won'] or state['times_played']:
+        print("AND YOU ACTUALLY WON", once_or_x_times(state["times_good_ending"]))
+        wait()
+        if state["total_choices"] == 40:
+            print("HOLY CRAP! YOU SMASHED THE GOOD ENDING IN THE MINIMUM POSSIBLE CHOICES!")
+            wait(3)
+            print("YOU F***ING ROCK!!!")
+            wait(4)
+        elif state["choices_count"] == 40 and state["hints_seen"] == 0:
+            print("WOW! YOU GOT THE GOOD ENDING WITHOUT ANY HINTS! IMPRESSIVE!!")
+    if state['times_won'] == 0:
+        if state['total_choices'] > 20:
+            print("YOU'RE WELL ON YOUR WAY. KEEP GOING!")
+        elif state['times_played']:
+            print("KEEP ON TRYING.")
+    elif (state['times_won'] or state['times_played']) and not state['times_good_ending']:
         print("YOU'RE GETTING THE HANG OF IT.")
     wait(1)
     # Return to main menu
@@ -895,7 +906,7 @@ def next_chemistry():
     print("YOU DIVE OUT OF THE WAY, AND THE ANVIL FALLS HARMLESSLY TO THE SPOT WHERE YOU WERE.")
     pause()
     print("WAIT!!")
-    wait(1)
+    wait(0.5)
     print("AN ANVIL?!?!")
     pause()
     print("YOU MAKE IT TO CLASS IN ONE PIECE.")
@@ -1261,7 +1272,7 @@ def area51_no():
     area51_menu()
 
 def area51_book_menu():
-    choice = menu("WHAT DO YOU DO ?", [
+    choice = menu("WHAT DO YOU DO?", [
         ("READ IT", area51_read),
         ("EAT IT", area51_eat)
     ])
@@ -1410,9 +1421,9 @@ def area51_jokes():
     pause()
     print("YES, I REALIZE ITS A LONG WAY.")
     pause()
-    print("WHAT A DAY ITS BEEN.")
+    print("WHAT A DAY IT'S BEEN.")
     pause()
-    print("HEY, ISN'T THAT THE GIRL THAT YOU SAW EARLIER IN LUNCH?")
+    print("HEY, ISN'T THAT THE GIRL THAT YOU SAW EARLIER AT LUNCH?")
     pause()
     print("YEA! YEA!")
     pause()
@@ -1426,11 +1437,11 @@ def area51_jokes():
     pause()
     print("...")
     pause()
-    print("WHAT THE HELL KIND OF CRAP ENDING WAS THAT?!?!")
+    print("\nWHAT THE HELL KIND OF CRAP ENDING WAS THAT?!?!")
     pause()
     print("LETS TRY THAT AGAIN.")
     pause()
-    print("TIME TRAVELING...")
+    print("TIME TRAVELING...\n")
     pause()
     print("SO YOU KILLED THE ALIEN SQUID CULT AND YOU ARE A HERO.")
     pause()
@@ -1486,11 +1497,14 @@ def final_dig():
     pause()
     print("OH, BEHAVE!")
     pause()
+    print("YOU DOWN THE ENTIRE VIAL AND...")
+    pause()
     print("YOU CAN IMAGINE WHAT HAPPENS NEXT.")
     pause()
     print("USE YOUR IMAGINATION.")
     pause()
     print("HEEHEEHEEHEE.")
+    wait(1)
     pause()
     print("A HALF HOUR LATER, YOU DRIFT OFF TO SLEEP.")
     pause()
