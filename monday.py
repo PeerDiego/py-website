@@ -232,8 +232,8 @@ def main_menu():
     print("Thanks for playing!")
 
 def pointless_info():
-    def once_or_x_times(integer):
-        return "ONCE." if integer == 1 else f"{integer} TIMES."
+    def once_or_x_times(integer, end_punctutation="."):
+        return ("ONCE" if integer == 1 else f"{integer} TIMES") + end_punctutation
     print("\nHERE'S SOME USELESS INFORMATION.")
     pause()
     print("YOU HAVE PLAYED THIS GAME", once_or_x_times(state["times_played"]))
@@ -258,15 +258,20 @@ def pointless_info():
             print(F"YOU HAVE VIEWED {'ONLY ONE' if state['hints_seen'] == 1 else state['hints_seen']} HINT{'' if state['hints_seen'] == 1 else 'S'}.")
     wait(1.5)
     if state['times_good_ending'] > 0:
-        print("AND YOU ACTUALLY WON", once_or_x_times(state["times_good_ending"]))
+        print("AND YOU ACTUALLY WON", once_or_x_times(state["times_good_ending"], end_punctutation="!"))
         wait()
         if state["total_choices"] == 40:
-            print("HOLY CRAP! YOU SMASHED THE GOOD ENDING IN THE MINIMUM POSSIBLE CHOICES!")
+            print("WOW! YOU SMASHED THE GOOD ENDING IN THE MINIMUM POSSIBLE CHOICES!")
             wait(3)
             print("YOU F***ING ROCK!!!")
             wait(4)
-        elif state["choices_count"] == 40 and state["hints_seen"] == 0:
-            print("WOW! YOU GOT THE GOOD ENDING WITHOUT ANY HINTS! IMPRESSIVE!!")
+        elif state["total_choices"] == 42:
+            print("WOW! YOU FORCED THE GOOD ENDING IN ALMOST THE LEAST AMOUNT OF CHOICES!")
+            print("THINK YOU CAN DO IT IN LESS?")
+            wait(3)
+        if state["hints_seen"] == 0:
+            print("HOLY CRAP! AND YOU DID IT WITHOUT ANY HINTS! IMPRESSIVE!!")
+            wait()
     if state['times_won'] == 0:
         if state['total_choices'] > 20:
             print("YOU'RE WELL ON YOUR WAY. KEEP GOING!")
@@ -412,6 +417,8 @@ def credits():
     if state["times_good_ending"]:
         print()
         if state["hints_seen"] == 0:
+            print("HEY...")
+            wait()
             print("WE WANTED TO TAKE A MOMENT TO COMMEND YOU ON YOUR GRIT AND PERSERVERENCE",
                 "\nWHICH YOU UTILIZED TO THEIR FULLEST TO COMLETE MONDAY WITHOUT *ANY* HINTS!",
                 "\n\n\tWELL DONE CHAMP! (GOLF CLAP)")
@@ -419,7 +426,7 @@ def credits():
             print("CONGRATS, YOU WON WITHOUT PEEKING AT ALL THE HINTS!",
                   "\nEITHER YOU'RE LUCKY, A GENIUS, OR YOU REALLY NEED TO GET OUT MY HEAD.")
         print()
-        pause()
+        pause("Press Enter to return to the main menu...")
     # quit_game()
 
 def quit_game():
@@ -579,7 +586,7 @@ def leave_for_bus():
     game_over()
 
 def bus_menu():
-    choice = menu("   PACKED BAG   ", [("GO TO BUS STOP", get_to_bus_stop), ("BACK TO BED", back_to_bed)])
+    choice = menu("   BAG PACKED.   ", [("GO TO BUS STOP", get_to_bus_stop), ("BACK TO BED", back_to_bed)])
     choice()
 
 def get_to_bus_stop():
@@ -903,7 +910,7 @@ def wrong_class3():
 def next_chemistry():
     print("AS YOU ARE WALKING, YOU HEAR A LOUD CRASHING NOISE.")
     pause()
-    print("YOU DIVE OUT OF THE WAY, AND THE ANVIL FALLS HARMLESSLY TO THE SPOT WHERE YOU WERE.")
+    print("YOU DIVE OUT OF THE WAY, AND THE ANVIL DROPS WITHOUT CASUALTY ONTO THE SPOT WHERE YOU WERE.")
     pause()
     print("WAIT!!")
     wait(0.5)
@@ -963,7 +970,7 @@ def end_of_day_menu():
 def go_to_bus():
     insistant = state["insists_on_going_home"] > 1
     if state["cash"] != 10000000 or insistant:
-        print("FINE! " if insistant else "","YOU'RE ON THE BUS...")
+        print("FINE. " if insistant else "","YOU'RE ON THE BUS...")
         pause()
         bus_end_menu()
     else:
@@ -1024,11 +1031,15 @@ def bus_cd():
     game_over()
 
 def bus_sleep():
-    print("YOU LOOK OUT THE WINDOW AND SEE A BILLBOARD WITH A PICTURE OF THE GIRL ON IT.")
+    print("YOU LOOK OUT THE WINDOW AND SEE A BILLBOARD WITH THE GIRL FROM LUNCH ON IT.")
     pause()
-    print("AND SHE'S GIVING A PEACE SIGN. STRANGE.")
+    print("IT'S ABOUT SINGLES IN YOUR AREA AND SHE'S GIVING A PEACE SIGN. STRANGE.")
     pause()
-    print("YOU SLEEP. THEN YOU WAKE UP.")
+    print("WAIT, SHE'S A MODEL?")
+    pause()
+    print("OH CRUD, YOU FORGOT TO MEET HER AFTER SCHOOL!")
+    pause()
+    print("YOU FALL ASLEEP KICKING YOURSELF. THEN YOU WAKE UP.")
     pause()
     print("HEY, IT WORKS FOR ME ALL THE TIME!")
     pause()
@@ -1174,9 +1185,9 @@ def texas_give():
         pause()
         print("THE HOSTAGE WAS THE PRESIDENT OF TEXAS INSTRUMENTS!")
         pause()
-        print("THE PRESIDENT TAKES YOU TO THE COMPANY BUILDING AND GIVES YOU A TI-83 PLUS.")
+        print("HE TAKES YOU TO THE COMPANY BUILDING AND GIVES YOU A TI-83 PLUS.")
         pause()
-        print("EXCELLENT!")
+        print("EXCELLENT! *GUITAR RIFF*")
         pause()
         print("YOU TAKE IT AND START TO LEAVE, BUT HE'S NOT DONE YET.")
         pause()
@@ -1211,7 +1222,7 @@ def scalp_ticket():
     game_over()
 
 def board_plane():
-    print("YOU BOARD THE PLANE TO GO HOME AND FALL ASLEEP.")
+    print("YOU EXCITEDLY BOARD THE PLANE TO GO HOME BUT PROMPTLY FALL ASLEEP.")
     pause()
     print("ZZZZZ...")
     pause()
@@ -1339,7 +1350,7 @@ def area51_drink():
 def area51_look():
     print("YOU LOOK AT THE AIR VENT AND GET A SUDDEN URGE TO CLIMB THROUGH IT")
     pause()
-    print("SO YOU DO.")
+    print("SO YOU DO. YIPPEE KI-YAY")
     pause()
     area51_vent()
 
@@ -1423,7 +1434,7 @@ def area51_jokes():
     pause()
     print("WHAT A DAY IT'S BEEN.")
     pause()
-    print("HEY, ISN'T THAT THE GIRL THAT YOU SAW EARLIER AT LUNCH?")
+    print("HEY, ISN'T THAT THE GIRL FROM LUNCH EARLIER TODAY?")
     pause()
     print("YEA! YEA!")
     pause()
@@ -1436,12 +1447,15 @@ def area51_jokes():
     print("YOU GIVE IT TO HER AND YOU TWO LIVE HAPPILY EVER AFTER.")
     pause()
     print("...")
+    wait()
     pause()
     print("\nWHAT THE HELL KIND OF CRAP ENDING WAS THAT?!?!")
     pause()
     print("LETS TRY THAT AGAIN.")
     pause()
-    print("TIME TRAVELING...\n")
+    print("TIME TRAVELING...")
+    print()
+    wait(1)
     pause()
     print("SO YOU KILLED THE ALIEN SQUID CULT AND YOU ARE A HERO.")
     pause()
@@ -1453,7 +1467,7 @@ def area51_jokes():
     pause()
     print("\"YOU KNOW WHAT I WANT TO DO...\"")
     pause()
-    print("\"YEA... BUT I'M NOT REALLY IN THE MOOD.\"")
+    print("*GULP* \"YEA... BUT I'M NOT REALLY IN THE MOOD.\"")
     pause()
     final_menu()
 
@@ -1469,6 +1483,7 @@ def final_giveup():
     print("WHAT KIND OF LOSER ARE YOU!?!")
     pause()
     print("YOU CAME ALL THIS WAY FOR... NOTHING!")
+    pause("Press Send to roll the credits...")
     game_over()
 
 def final_scream():
@@ -1480,6 +1495,7 @@ def final_scream():
     pause()
     print("IT DOES.")
     wait()
+    pause("Press Send to roll the credits...")
     game_over()
 
 def final_dig():
@@ -1511,9 +1527,9 @@ def final_dig():
     print("AND YOU THINK TO YOURSELF...")
     pause()
     print("THIS DAY WAS AWESOME!\n\n")
-    pause()
-    print("      ROLL\n      THE\n    CREDITS!   ")
     wait()
+    print("      ROLL\n      THE\n    CREDITS!   ")
+    pause("Press Send to roll the credits...")
     state["times_good_ending"] += 1
     credits()
 
