@@ -395,8 +395,7 @@ async function runPythonProgram() {
     debug('app.js', 'Starting Python program...');
     // changes status message from "Python environment ready!" to "Good luck!"
     // status.id=""; // removing #status id to let color be dictated by status-running class
-    status.textContent = 'Good luck!';
-    status.className = 'status-running';
+    status.className = 'status-running-rainbox';
     status.innerHTML = 'Good luck!';
     pythonVersion.innerHTML = 'Brought to you by <a href="http://www.lazyspaniard.com" target="_blank">Lazy Spaniard</a>'
     
