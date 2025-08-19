@@ -1,4 +1,51 @@
 // Python Interactive Chat - Clean and Simple
+
+// Debug mode detection
+const urlParams = new URLSearchParams(window.location.search);
+const debugMode = urlParams.get('debug') === 'true';
+
+// Add debug output div if in debug mode
+let debugOutput;
+if (debugMode) {
+    debugOutput = document.createElement('div');
+    debugOutput.id = 'debug-output';
+    debugOutput.style.cssText = `
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        width: 300px;
+        height: 200px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #00ff00;
+        font-family: monospace;
+        padding: 10px;
+        overflow-y: auto;
+        z-index: 1000;
+        border: 1px solid #00ff00;
+        font-size: 12px;
+    `;
+    document.body.appendChild(debugOutput);
+}
+
+// Wrap console methods to also output to debug div
+const originalConsole = { ...console };
+if (debugMode) {
+    ['log', 'error', 'warn', 'info'].forEach(method => {
+        console[method] = (...args) => {
+            // Call original console method
+            originalConsole[method](...args);
+            // Add to debug output
+            const text = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            const timestamp = new Date().toLocaleTimeString();
+            debugOutput.innerHTML += `<div style="color: ${method === 'error' ? '#ff0000' : method === 'warn' ? '#ffff00' : '#00ff00'}">
+                [${timestamp}] ${method.toUpperCase()}: ${text}</div>`;
+            debugOutput.scrollTop = debugOutput.scrollHeight;
+        };
+    });
+}
+
 let pyodide;
 let isInitialized = false;
 let pythonProgram = '';
@@ -114,6 +161,32 @@ function clearAppData(key = 'app_data') {
 // Initialize Pyodide
 async function initializePyodide() {
     try {
+        // Early environment detection
+        console.log('Environment Check:', {
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            vendor: navigator.vendor,
+            isSafari: /^((?!chrome|android).)*safari/i.test(navigator.userAgent),
+            isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+        });
+
+        // Check if we're on iOS and warn about potential issues
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+            console.warn('iOS device detected - checking WebAssembly support...');
+            if (typeof WebAssembly === 'object') {
+                console.log('WebAssembly is supported');
+                // Check for streaming support
+                if (typeof WebAssembly.instantiateStreaming === 'function') {
+                    console.log('WebAssembly streaming is supported');
+                } else {
+                    console.warn('WebAssembly streaming is not supported - this may cause issues');
+                }
+            } else {
+                console.error('WebAssembly is not supported on this device');
+                throw new Error('WebAssembly is required but not supported on this device');
+            }
+        }
+
         console.log('Loading Pyodide...');
         addMessage('system', 'Initializing Python environment... Please wait.');
         status.textContent = 'Loading Pyodide...';
@@ -383,6 +456,35 @@ runScriptButton.addEventListener('click', runPythonProgram);
 clearButton.addEventListener('click', clearChat);
 
 // Initialize on page load
+// Early error handler
+window.addEventListener('error', function(event) {
+    console.error('Global error:', {
+        message: event.message,
+        source: event.filename,
+        lineNo: event.lineno,
+        colNo: event.colno,
+        error: event.error
+    });
+});
+
+// Unhandled promise rejection handler
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('Unhandled Promise rejection:', {
+        reason: event.reason
+    });
+});
+
 document.addEventListener('DOMContentLoaded', () => {
-    initializePyodide();
+    console.log('DOM Content Loaded - Starting initialization...');
+    try {
+        initializePyodide().catch(err => {
+            console.error('Failed to initialize Pyodide:', err);
+            status.textContent = 'Failed to initialize: ' + err.message;
+            addMessage('error', `Initialization failed: ${err.message}`);
+        });
+    } catch (err) {
+        console.error('Critical initialization error:', err);
+        status.textContent = 'Critical error: ' + err.message;
+        addMessage('error', `Critical error: ${err.message}`);
+    }
 });
