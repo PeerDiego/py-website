@@ -243,14 +243,14 @@ async function loadPythonProgram() {
             throw new Error(`HTTP ${response.status}`);
         }
     } catch (error) {
-        console.log('Using fallback program');
+        addMessage('error', `Error: ${error}\nUsing fallback python program`);
         pythonProgram = `
 print("🎉 Welcome to Python Interactive Chat!")
 
-name = input("What's your name? ")
+name = await input("What's your name? ")
 print(f"Hello, {name}! Nice to meet you!")
 
-age = input("How old are you? ")
+age = await input("How old are you? ")
 print(f"You are {age} years old.")
 
 print("Thanks for testing the interactive chat!")

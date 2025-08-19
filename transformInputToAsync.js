@@ -3,7 +3,7 @@
 // Usage: node transformInputToAsync.js <python_file.py>
 
 // List of additional function names that should be transformed to use await
-const ALSO_TRANSFORM = ["choice"];  // Add function names without parentheses
+const ALSO_TRANSFORM = ["custom_function_name"];  // Add function names without parentheses
 
 import { debug } from './debugUtils.js';
 const MODULE_NAME = 'transformInputToAsync.js';
