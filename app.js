@@ -149,12 +149,12 @@ js_load_data = globals()['js_load_data']
 js_clear_data = globals()['js_clear_data']
 
 # Override print
-def new_print(*args, **kwargs):
+def new_print(*args, msg_type='python', **kwargs):
     text = ' '.join(str(arg) for arg in args)
-    js_print(text)
+    js_print(text, msg_type)
     # Also log to browser console for debugging
     from js import console
-    console.log(f"Python print: {text}")
+    console.log(f"Python print: {text} (type: {msg_type})")
 
 # Override input - this will work with await in the async context
 async def new_input(prompt=""):
@@ -212,8 +212,8 @@ print("Python environment ready!")
         runScriptButton.disabled = false;
         userInput.placeholder = 'Type a message...';
         
-        addMessage('system', 'Python environment initialized successfully! Click "Run Python Program" to start the interactive program.');
-        
+        addMessage('system', 'Python environment initialized successfully! Click "Run Python Program" to start.');
+
         // Focus the run button and add keyboard listener
         runScriptButton.focus();
         
@@ -279,8 +279,8 @@ function addMessage(type, content, timestamp = null) {
 }
 
 // Display Python output
-function displayPythonOutput(text) {
-    addMessage('python', text);
+function displayPythonOutput(text, type = 'python') {
+    addMessage(type, text);
 }
 
 // Get user input (called from Python)
@@ -317,7 +317,13 @@ async function runPythonProgram() {
         return;
     }
     
-    addMessage('system', 'Starting Python program...');
+    // swapping for a debug message instead
+    // addMessage('system', 'Starting Python program...');
+    debug('app.js', 'Starting Python program...');
+    // changes status message from "Python environment ready!" to "Good luck!"
+    // status.id=""; // removing #status id to let color be dictated by status-running class
+    status.className = 'status-running';
+    status.innerHTML = 'Good luck!';
     
     try {
         // Wrap the transformed program in an async function
