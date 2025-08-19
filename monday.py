@@ -64,6 +64,7 @@ def reset_saved_stats():
     state["times_good_ending"] = 0
     state["hints_seen"]        = 0
     state["total_choices"]     = 0
+    state["choices_count"]     = 0
 
 def initialize_game_state():
     """Reset the game state to default values for a new game."""
@@ -258,7 +259,7 @@ def pointless_info():
             print(F"YOU HAVE VIEWED {'ONLY ONE' if state['hints_seen'] == 1 else state['hints_seen']} HINT{'' if state['hints_seen'] == 1 else 'S'}.")
     wait(1.5)
     if state['times_good_ending'] > 0:
-        print("AND YOU ACTUALLY WON", once_or_x_times(state["times_good_ending"], end_punctutation="!"))
+        print("AND YOU ACTUALLY WON", once_or_x_times(state["times_good_ending"], end_punctutation="!"), "NOT THAT FAKE PARTICIPATION MEDAL WIN.")
         wait()
         if state["total_choices"] == 40:
             print("WOW! YOU SMASHED THE GOOD ENDING IN THE MINIMUM POSSIBLE CHOICES!")
@@ -297,7 +298,7 @@ def hint_yes():
     print("SOME DECISIONS WON'T AFFECT YOU UNTIL LATER ON.")
     pause()
     print("...MUHUWAHAHAHA")
-    wait()
+    wait(1)
     choice = menu("WANT MORE HINTS?", [("YEA", hint_yes_two), ("NOPE", main_menu)], count_choice=False)
     choice()
 
@@ -418,10 +419,12 @@ def credits():
         print()
         if state["hints_seen"] == 0:
             print("HEY...")
-            wait()
-            print("WE WANTED TO TAKE A MOMENT TO COMMEND YOU ON YOUR GRIT AND PERSERVERENCE",
-                "\nWHICH YOU UTILIZED TO THEIR FULLEST TO COMLETE MONDAY WITHOUT *ANY* HINTS!",
-                "\n\n\tWELL DONE CHAMP! (GOLF CLAP)")
+            wait(5)
+            print("WE WANTED TO TAKE A MOMENT TO COMMEND YOU ON YOUR GRIT AND PERSERVERENCE")
+            wait(3)
+            print("WHICH YOU UTILIZED TO THEIR FULLEST TO COMLETE MONDAY WITHOUT *ANY* HINTS!")
+            wait(6)
+            print("\n\n\tWELL DONE CHAMP! (GOLF CLAP)")
         elif state["hints_seen"] < 4:
             print("CONGRATS, YOU WON WITHOUT PEEKING AT ALL THE HINTS!",
                   "\nEITHER YOU'RE LUCKY, A GENIUS, OR YOU REALLY NEED TO GET OUT MY HEAD.")
@@ -1033,7 +1036,7 @@ def bus_cd():
 def bus_sleep():
     print("YOU LOOK OUT THE WINDOW AND SEE A BILLBOARD WITH THE GIRL FROM LUNCH ON IT.")
     pause()
-    print("IT'S ABOUT SINGLES IN YOUR AREA AND SHE'S GIVING A PEACE SIGN. STRANGE.")
+    print("IT'S ABOUT SINGLES IN YOUR AREA AND SHE'S MAKING A PEACE SIGN. STRANGE.")
     pause()
     print("WAIT, SHE'S A MODEL?")
     pause()
