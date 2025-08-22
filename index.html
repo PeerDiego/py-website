@@ -6,6 +6,81 @@
     <title>Python Chat Interface</title>
     <link rel="stylesheet" href="styles_chat.css">
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <!-- Early error detection -->
+    <script>
+        // Create debug overlay only when debug=true in URL
+        const debugMode = new URLSearchParams(window.location.search).get('debug') === 'true';
+        if (debugMode) {
+            const earlyDebug = document.createElement('div');
+            earlyDebug.id = 'early-debug';
+            earlyDebug.style.cssText = `
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                width: 300px;
+                height: 200px;
+                background: rgba(0, 0, 0, 0.8);
+                color: #ff0000;
+                font-family: monospace;
+                padding: 10px;
+                overflow-y: auto;
+                z-index: 1001;
+                border: 1px solid #ff0000;
+                font-size: 12px;
+            `;
+            document.addEventListener('DOMContentLoaded', () => document.body.appendChild(earlyDebug));
+
+            // Early logging function
+            window.earlyLog = function(msg) {
+                if (earlyDebug) {
+                    const timestamp = new Date().toLocaleTimeString();
+                    earlyDebug.innerHTML += `<div>[${timestamp}] ${msg}</div>`;
+                    earlyDebug.scrollTop = earlyDebug.scrollHeight;
+                }
+            };
+
+            // Catch early errors
+            window.addEventListener('error', function(event) {
+                window.earlyLog(`ERROR: ${event.message} at ${event.filename}:${event.lineno}`);
+            });
+
+            window.addEventListener('unhandledrejection', function(event) {
+                window.earlyLog(`PROMISE ERROR: ${event.reason}`);
+            });
+
+            // Log some early diagnostics
+            window.earlyLog('Early debug initialized');
+            window.earlyLog(`UserAgent: ${navigator.userAgent}`);
+            window.earlyLog(`WebAssembly: ${typeof WebAssembly}`);
+            if (typeof WebAssembly === 'object') {
+                window.earlyLog(`WebAssembly.instantiateStreaming: ${typeof WebAssembly.instantiateStreaming}`);
+            }
+
+            // Monitor Pyodide loading
+            window.addEventListener('load', () => {
+                window.earlyLog('Window load event fired');
+                if (window.loadPyodide) {
+                    window.earlyLog('loadPyodide found');
+                    window.loadPyodide().then(() => {
+                        window.earlyLog('Pyodide loaded successfully');
+                        
+                        // Track module loading
+                        window.earlyLog('Attempting to load app.js module');
+                        import("./app.js").then(() => {
+                            window.earlyLog('app.js module loaded successfully');
+                        }).catch(err => {
+                            window.earlyLog(`ERROR loading app.js: ${err.message}`);
+                        });
+
+                    }).catch(err => {
+                        window.earlyLog(`Pyodide load error: ${err.message}`);
+                    });
+                } else {
+                    window.earlyLog('ERROR: loadPyodide not found');
+                }
+            });
+        }
+    </script>
 </head>
 <body>
     <div class="container">
