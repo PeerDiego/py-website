@@ -66,11 +66,14 @@
                         
                         // Track module loading
                         window.earlyLog('Attempting to load app.js module');
-                        import("./app.js").then(() => {
-                            window.earlyLog('app.js module loaded successfully');
-                        }).catch(err => {
-                            window.earlyLog(`ERROR loading app.js: ${err.message}`);
-                        });
+                        // Load the app module
+                        const script = document.createElement('script');
+                        script.type = 'module';
+                        script.src = './app.js';
+                        script.onerror = (error) => {
+                            window.earlyLog(`ERROR loading app.js: ${error.type}`);
+                        };
+                        document.head.appendChild(script);
 
                     }).catch(err => {
                         window.earlyLog(`Pyodide load error: ${err.message}`);
