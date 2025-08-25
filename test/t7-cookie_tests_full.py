@@ -25,7 +25,7 @@ def test_basic_save_load():
     
     if loaded_data:
         print(f"Successfully loaded: {loaded_data}")
-        print("✅ Test 1 PASSED")
+        print("☑️ Test 1 PASSED")
     else:
         print("❌ Test 1 FAILED - no data loaded")
     
@@ -61,7 +61,7 @@ def test_multiple_keys():
     
     # Verify all data was saved and loaded correctly
     if loaded_prefs and loaded_stats and loaded_settings:
-        print("✅ Test 2 PASSED")
+        print("☑️ Test 2 PASSED")
     else:
         print("❌ Test 2 FAILED")
     
@@ -89,7 +89,7 @@ def test_data_persistence():
     
     if loaded_session and loaded_session.get("session_id") == session_id:
         print(f"Session data persisted: {loaded_session}")
-        print("✅ Test 3 PASSED")
+        print("☑️ Test 3 PASSED")
     else:
         print("❌ Test 3 FAILED")
     
@@ -126,7 +126,7 @@ def test_data_modification():
         loaded_progress.get("current_level") == 2 and 
         loaded_progress.get("experience") == 150 and
         "First Level Complete" in loaded_progress.get("achievements", [])):
-        print("✅ Test 4 PASSED")
+        print("☑️ Test 4 PASSED")
     else:
         print("❌ Test 4 FAILED")
     
@@ -154,7 +154,7 @@ def test_clear_data():
     print(f"Data after clearing: {cleared_data}")
     
     if cleared_data is None:
-        print("✅ Test 5 PASSED")
+        print("☑️ Test 5 PASSED")
     else:
         print("❌ Test 5 FAILED - data still exists")
     
@@ -175,7 +175,7 @@ def test_default_key():
     print(f"Loaded with default key: {loaded_default}")
     
     if loaded_default and loaded_default.get("using_default_key") == True:
-        print("✅ Test 6 PASSED")
+        print("☑️ Test 6 PASSED")
     else:
         print("❌ Test 6 FAILED")
     
@@ -192,7 +192,7 @@ def run_all_tests():
         save_data
         load_data
         clear_data
-        print("✅ Cookie functions are available!")
+        print("☑️ Cookie functions are available!")
     except NameError:
         print("❌ Cookie functions not available - make sure app.js is properly set up")
         return

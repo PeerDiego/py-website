@@ -122,7 +122,7 @@ Promise.all([
     setDebugModules({
         'app.js': true,
         'concatenatePrints.js': false,
-        'transformInputToAsync.js': true
+        'transformInputToAsync.js': false
     });
 }).catch(err => {
     earlyLog(`ERROR in module loading: ${err.message}`);
