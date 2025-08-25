@@ -51,7 +51,7 @@ function findFunctionsWithInputOrSleep(code) {
                 return {
                     name: fnName,
                     // More precise regex that only matches function calls
-                    has: new RegExp(`(?<!["'\`])\\b${fnName}\\s*\\(`).test(bodyNoComments)
+                    has: !(/["'`]/.test(bodyNoComments.charAt(bodyNoComments.indexOf(fnName) - 1))) && new RegExp(`\\b${fnName}\\s*\\(`).test(bodyNoComments)
                 };
             });
             
@@ -97,12 +97,16 @@ function findFunctionCalls(code, functionNames) {
     
     lines.forEach((line, idx) => {
         for (const name of functionNames) {
-            // More robust regex that handles function calls better
-            const callRegex = new RegExp(`(?<!def\\s+)\\b${name}\\s*\\(`, 'g');
+            // Safari-compatible version that doesn't use lookbehind
+            const defCheck = !line.trim().startsWith('def ');
+            const callRegex = new RegExp(`\\b${name}\\s*\\(`, 'g');
             let match;
             while ((match = callRegex.exec(line)) !== null) {
-                debug(MODULE_NAME, `Found call to '${name}' at line ${idx + 1}: ${line.trim()}`);
-                calls[name].push({ line: idx + 1, text: line.trim() });
+                // Only process if this isn't a function definition
+                if (defCheck) {
+                    debug(MODULE_NAME, `Found call to '${name}' at line ${idx + 1}: ${line.trim()}`);
+                    calls[name].push({ line: idx + 1, text: line.trim() });
+                }
             }
         }
     });
@@ -194,11 +198,15 @@ function transformPythonCode(code, functionInfos, calls) {
         
         for (let i = 0; i < lines.length; i++) {
             // More precise regex that only matches function calls, not strings
-            const fnRegex = new RegExp(`(?<!["'\`])\\b${fnName}\\s*\\(`);
-            const awaitRegex = new RegExp(`(?<!["'\`])\\bawait\\s+${fnName}\\s*\\(`);
+            const fnRegex = new RegExp(`\\b${fnName}\\s*\\(`);
+            const awaitRegex = new RegExp(`\\bawait\\s+${fnName}\\s*\\(`);
             
-            // Only add await if it's not already there
+            // Only add await if it's not already there and not in a string
             if (fnRegex.test(lines[i]) && !awaitRegex.test(lines[i])) {
+                // Check if the match is inside a string
+                const matchIndex = lines[i].search(fnRegex);
+                const charBefore = lines[i].charAt(matchIndex - 1);
+                if (/["'`]/.test(charBefore)) continue;  // Skip if inside a string
                 const oldLine = lines[i];
                 lines[i] = lines[i].replace(fnRegex, `await ${fnName}(`);
                 debug(MODULE_NAME, `Line ${i + 1}: '${oldLine}' → '${lines[i]}'`);

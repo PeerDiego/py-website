@@ -4,6 +4,11 @@
 const urlParams = new URLSearchParams(window.location.search);
 const debugMode = urlParams.get('debug') === 'true';
 
+// Early debug access
+const earlyLog = window.earlyLog || (() => {});
+const APP_VERSION = '2025.08.23.1'; // YYYY.MM.DD.version_number
+earlyLog(`app.js v${APP_VERSION} starting initialization`);
+
 // Add debug output div if in debug mode
 let debugOutput;
 if (debugMode) {
@@ -48,6 +53,17 @@ if (debugMode) {
 
 let pyodide;
 let isInitialized = false;
+
+// Log that we're starting Pyodide setup
+earlyLog('Starting Pyodide setup');
+
+// Track global Pyodide instance
+if (window.pyodide) {
+    earlyLog('Found existing Pyodide instance');
+    pyodide = window.pyodide;
+} else {
+    earlyLog('No existing Pyodide instance found');
+}
 let pythonProgram = '';
 let isWaitingForInput = false;
 let inputResolver = null;
@@ -74,19 +90,48 @@ if (inputType === 'numeric') {
     }
 }
 
-// Import from the transformInputToAsync module
-import { transformPythonForPyodide } from './transformInputToAsync.js';
-// Import from the concatenatePrints module
-import { concatenateConsecutivePrints } from './concatenatePrints.js';
-// Import debug utilities
-import { debug, setDebugModules } from './debugUtils.js';
+// Import modules
+earlyLog('Starting module imports...');
 
-// Configure which modules should show debug output
-setDebugModules({
-    'app.js': false,
-    'concatenatePrints.js': false,
-    'transformInputToAsync.js': false
+Promise.all([
+    import('./transformInputToAsync.js')
+        .then(module => {
+            window.transformPythonForPyodide = module.transformPythonForPyodide;
+            earlyLog('transformInputToAsync.js loaded');
+        })
+        .catch(err => earlyLog(`Error loading transformInputToAsync.js: ${err.message}`)),
+
+    import('./concatenatePrints.js')
+        .then(module => {
+            window.concatenateConsecutivePrints = module.concatenateConsecutivePrints;
+            earlyLog('concatenatePrints.js loaded');
+        })
+        .catch(err => earlyLog(`Error loading concatenatePrints.js: ${err.message}`)),
+
+    import('./debugUtils.js')
+        .then(module => {
+            window.debug = module.debug;
+            window.setDebugModules = module.setDebugModules;
+            earlyLog('debugUtils.js loaded');
+        })
+        .catch(err => earlyLog(`Error loading debugUtils.js: ${err.message}`))
+]).then(() => {
+    earlyLog('All modules loaded successfully');
+    // Configure which modules should show debug output after modules are loaded
+    earlyLog('Configuring debug modules');
+    setDebugModules({
+        'app.js': true,
+        'concatenatePrints.js': false,
+        'transformInputToAsync.js': false
+    });
+}).catch(err => {
+    earlyLog(`ERROR in module loading: ${err.message}`);
+    if (err.stack) {
+        earlyLog(`Stack trace: ${err.stack}`);
+    }
 });
+
+earlyLog('Starting DOM element initialization');
 
 // DOM elements
 const chatOutput = document.getElementById('chat-output');
@@ -96,6 +141,16 @@ const runScriptButton = document.getElementById('run-script-button');
 const clearButton = document.getElementById('clear-button');
 const status = document.getElementById('status');
 const pythonVersion = document.getElementById('python-version');
+
+// Log DOM element status
+earlyLog('DOM elements status:');
+earlyLog(`chat-output: ${chatOutput ? 'YES' : 'NO'}`);
+earlyLog(`user-input: ${userInput ? 'YES' : 'NO'}`);
+earlyLog(`send-button: ${sendButton ? 'YES' : 'NO'}`);
+earlyLog(`run-script-button: ${runScriptButton ? 'YES' : 'NO'}`);
+earlyLog(`clear-button: ${clearButton ? 'YES' : 'NO'}`);
+earlyLog(`status: ${status ? 'YES' : 'NO'}`);
+earlyLog(`python-version: ${pythonVersion ? 'YES' : 'NO'}`);
 
 // Cookie utility functions
 function setCookie(name, value, days = 30) {
@@ -286,7 +341,7 @@ print("Game loaded...")
         userInput.placeholder = 'Type a message...';
         
         addMessage('system', 'Python environment initialized successfully! Click "Play Game" to start.');
-
+        
         // Focus the run button and add keyboard listener
         runScriptButton.focus();
         
