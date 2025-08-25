@@ -1,31 +1,137 @@
 // Python Interactive Chat - Clean and Simple
+
+// Debug mode detection
+const urlParams = new URLSearchParams(window.location.search);
+const debugMode = urlParams.get('debug') === 'true';
+
+// Early debug access
+const earlyLog = window.earlyLog || (() => {});
+const APP_VERSION = '2025.08.23.1'; // YYYY.MM.DD.version_number
+earlyLog(`app.js v${APP_VERSION} starting initialization`);
+
+// Add debug output div if in debug mode
+let debugOutput;
+if (debugMode) {
+    debugOutput = document.createElement('div');
+    debugOutput.id = 'debug-output';
+    debugOutput.style.cssText = `
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        width: 300px;
+        height: 200px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #00ff00;
+        font-family: monospace;
+        padding: 10px;
+        overflow-y: auto;
+        z-index: 1000;
+        border: 1px solid #00ff00;
+        font-size: 12px;
+    `;
+    document.body.appendChild(debugOutput);
+}
+
+// Wrap console methods to also output to debug div
+const originalConsole = { ...console };
+if (debugMode) {
+    ['log', 'error', 'warn', 'info'].forEach(method => {
+        console[method] = (...args) => {
+            // Call original console method
+            originalConsole[method](...args);
+            // Add to debug output
+            const text = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            const timestamp = new Date().toLocaleTimeString();
+            debugOutput.innerHTML += `<div style="color: ${method === 'error' ? '#ff0000' : method === 'warn' ? '#ffff00' : '#00ff00'}">
+                [${timestamp}] ${method.toUpperCase()}: ${text}</div>`;
+            debugOutput.scrollTop = debugOutput.scrollHeight;
+        };
+    });
+}
+
 let pyodide;
 let isInitialized = false;
+
+// Log that we're starting Pyodide setup
+earlyLog('Starting Pyodide setup');
+
+// Track global Pyodide instance
+if (window.pyodide) {
+    earlyLog('Found existing Pyodide instance');
+    pyodide = window.pyodide;
+} else {
+    earlyLog('No existing Pyodide instance found');
+}
 let pythonProgram = '';
 let isWaitingForInput = false;
 let inputResolver = null;
 
-// Check if we're using the game CSS (as opposed to chat CSS)
-const isGameMode = document.querySelector('link[href*="styles_game"]') !== null;
-if (isGameMode) {
+// Get CSS custom properties for input configuration
+const computedStyle = getComputedStyle(document.documentElement);
+const inputType = computedStyle.getPropertyValue('--input-type').trim().replace(/['"]/g, '');
+const autoAcceptNumeric = computedStyle.getPropertyValue('--auto-accept-numeric-input').trim().replace(/['"]/g, '') === 'true';
+
+// Configure input based on CSS properties
+if (inputType === 'numeric') {
     const userInput = document.getElementById('user-input');
     userInput.setAttribute('inputmode', 'numeric');
     userInput.setAttribute('pattern', '[0-9]*');
+    
+    // Only add auto-submit if auto-accept-numeric-input is enabled
+    if (autoAcceptNumeric) {
+        userInput.addEventListener('input', function(e) {
+            const value = e.target.value;
+            if (/^\d+$/.test(value)) {  // Check if input is numeric
+                sendButton.click();  // Automatically trigger send
+            }
+        });
+    }
 }
 
-// Import from the transformInputToAsync module
-import { transformPythonForPyodide } from './transformInputToAsync.js';
-// Import from the concatenatePrints module
-import { concatenateConsecutivePrints } from './concatenatePrints.js';
-// Import debug utilities
-import { debug, setDebugModules } from './debugUtils.js';
+// Import modules
+earlyLog('Starting module imports...');
 
-// Configure which modules should show debug output
-setDebugModules({
-    'app.js': false,
-    'concatenatePrints.js': false,
-    'transformInputToAsync.js': false
+Promise.all([
+    import('./transformInputToAsync.js')
+        .then(module => {
+            window.transformPythonForPyodide = module.transformPythonForPyodide;
+            earlyLog('transformInputToAsync.js loaded');
+        })
+        .catch(err => earlyLog(`Error loading transformInputToAsync.js: ${err.message}`)),
+
+    import('./concatenatePrints.js')
+        .then(module => {
+            window.concatenateConsecutivePrints = module.concatenateConsecutivePrints;
+            earlyLog('concatenatePrints.js loaded');
+        })
+        .catch(err => earlyLog(`Error loading concatenatePrints.js: ${err.message}`)),
+
+    import('./debugUtils.js')
+        .then(module => {
+            window.debug = module.debug;
+            window.setDebugModules = module.setDebugModules;
+            earlyLog('debugUtils.js loaded');
+        })
+        .catch(err => earlyLog(`Error loading debugUtils.js: ${err.message}`))
+]).then(() => {
+    earlyLog('All modules loaded successfully');
+    // Configure which modules should show debug output after modules are loaded
+    earlyLog('Configuring debug modules');
+    setDebugModules({
+        'app.js': true,
+        'concatenatePrints.js': false,
+        'transformInputToAsync.js': false
+    });
+}).catch(err => {
+    earlyLog(`ERROR in module loading: ${err.message}`);
+    if (err.stack) {
+        earlyLog(`Stack trace: ${err.stack}`);
+    }
 });
+
+earlyLog('Starting DOM element initialization');
 
 // DOM elements
 const chatOutput = document.getElementById('chat-output');
@@ -35,6 +141,16 @@ const runScriptButton = document.getElementById('run-script-button');
 const clearButton = document.getElementById('clear-button');
 const status = document.getElementById('status');
 const pythonVersion = document.getElementById('python-version');
+
+// Log DOM element status
+earlyLog('DOM elements status:');
+earlyLog(`chat-output: ${chatOutput ? 'YES' : 'NO'}`);
+earlyLog(`user-input: ${userInput ? 'YES' : 'NO'}`);
+earlyLog(`send-button: ${sendButton ? 'YES' : 'NO'}`);
+earlyLog(`run-script-button: ${runScriptButton ? 'YES' : 'NO'}`);
+earlyLog(`clear-button: ${clearButton ? 'YES' : 'NO'}`);
+earlyLog(`status: ${status ? 'YES' : 'NO'}`);
+earlyLog(`python-version: ${pythonVersion ? 'YES' : 'NO'}`);
 
 // Cookie utility functions
 function setCookie(name, value, days = 30) {
@@ -100,6 +216,32 @@ function clearAppData(key = 'app_data') {
 // Initialize Pyodide
 async function initializePyodide() {
     try {
+        // Early environment detection
+        console.log('Environment Check:', {
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            vendor: navigator.vendor,
+            isSafari: /^((?!chrome|android).)*safari/i.test(navigator.userAgent),
+            isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+        });
+
+        // Check if we're on iOS and warn about potential issues
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+            console.warn('iOS device detected - checking WebAssembly support...');
+            if (typeof WebAssembly === 'object') {
+                console.log('WebAssembly is supported');
+                // Check for streaming support
+                if (typeof WebAssembly.instantiateStreaming === 'function') {
+                    console.log('WebAssembly streaming is supported');
+                } else {
+                    console.warn('WebAssembly streaming is not supported - this may cause issues');
+                }
+            } else {
+                console.error('WebAssembly is not supported on this device');
+                throw new Error('WebAssembly is required but not supported on this device');
+            }
+        }
+
         console.log('Loading Pyodide...');
         addMessage('system', 'Initializing Python environment... Please wait.');
         status.textContent = 'Loading Pyodide...';
@@ -135,12 +277,12 @@ js_load_data = globals()['js_load_data']
 js_clear_data = globals()['js_clear_data']
 
 # Override print
-def new_print(*args, **kwargs):
+def new_print(*args, msg_type='python', **kwargs):
     text = ' '.join(str(arg) for arg in args)
-    js_print(text)
+    js_print(text, msg_type)
     # Also log to browser console for debugging
     from js import console
-    console.log(f"Python print: {text}")
+    console.log(f"Python print: {text} (type: {msg_type})")
 
 # Override input - this will work with await in the async context
 async def new_input(prompt=""):
@@ -198,7 +340,10 @@ print("Python environment ready!")
         runScriptButton.disabled = false;
         userInput.placeholder = 'Type a message...';
         
-        addMessage('system', 'Python environment initialized successfully! Click "Run Python Program" to start the interactive program.');
+        addMessage('system', 'Python environment initialized successfully! Click "Run Python Program" to start.');
+
+        // Focus the run button and add keyboard listener
+        runScriptButton.focus();
         
     } catch (error) {
         console.error('Initialization error:', error);
@@ -226,14 +371,14 @@ async function loadPythonProgram() {
             throw new Error(`HTTP ${response.status}`);
         }
     } catch (error) {
-        console.log('Using fallback program');
+        addMessage('error', `Error: ${error}\nUsing fallback python program`);
         pythonProgram = `
 print("🎉 Welcome to Python Interactive Chat!")
 
-name = input("What's your name? ")
+name = await input("What's your name? ")
 print(f"Hello, {name}! Nice to meet you!")
 
-age = input("How old are you? ")
+age = await input("How old are you? ")
 print(f"You are {age} years old.")
 
 print("Thanks for testing the interactive chat!")
@@ -262,8 +407,8 @@ function addMessage(type, content, timestamp = null) {
 }
 
 // Display Python output
-function displayPythonOutput(text) {
-    addMessage('python', text);
+function displayPythonOutput(text, type = 'python') {
+    addMessage(type, text);
 }
 
 // Get user input (called from Python)
@@ -300,7 +445,13 @@ async function runPythonProgram() {
         return;
     }
     
-    addMessage('system', 'Starting Python program...');
+    // swapping for a debug message instead
+    // addMessage('system', 'Starting Python program...');
+    debug('app.js', 'Starting Python program...');
+    // changes status message from "Python environment ready!" to "Good luck!"
+    // status.id=""; // removing #status id to let color be dictated by status-running class
+    status.className = 'status-running';
+    status.innerHTML = 'Good luck!';
     
     try {
         // Wrap the transformed program in an async function
@@ -358,6 +509,35 @@ runScriptButton.addEventListener('click', runPythonProgram);
 clearButton.addEventListener('click', clearChat);
 
 // Initialize on page load
+// Early error handler
+window.addEventListener('error', function(event) {
+    console.error('Global error:', {
+        message: event.message,
+        source: event.filename,
+        lineNo: event.lineno,
+        colNo: event.colno,
+        error: event.error
+    });
+});
+
+// Unhandled promise rejection handler
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('Unhandled Promise rejection:', {
+        reason: event.reason
+    });
+});
+
 document.addEventListener('DOMContentLoaded', () => {
-    initializePyodide();
+    console.log('DOM Content Loaded - Starting initialization...');
+    try {
+        initializePyodide().catch(err => {
+            console.error('Failed to initialize Pyodide:', err);
+            status.textContent = 'Failed to initialize: ' + err.message;
+            addMessage('error', `Initialization failed: ${err.message}`);
+        });
+    } catch (err) {
+        console.error('Critical initialization error:', err);
+        status.textContent = 'Critical error: ' + err.message;
+        addMessage('error', `Critical error: ${err.message}`);
+    }
 });

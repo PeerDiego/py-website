@@ -4,18 +4,12 @@ MONDAY - Demo Template Version
 """
 
 import time
-import sys
 
 def pause(prompt="Press Enter to continue..."):
     input(f"\n{prompt}")
-    # Move cursor up and clear the line
-    sys.stdout.write("\033[F")
-    sys.stdout.write(" " * len(prompt) + "\r")
-    sys.stdout.flush()
 
 def wait(s=2.0):
     time.sleep(s)
-    # print()
 
 def menu(title, options):
     menu_text = f"\n{title}"
@@ -46,7 +40,7 @@ def title_screen():
     print("\n    {}{}{}{}{}{}{}{}{}{}{}")
     print("   {{{{{{{{ MONDAY }}}}}}}}")
     print("    {}{}{}{}{}{}{}{}{}{}{}")
-    print("\n       DEMO VERSION")
+    print("\n          DEMO VERSION")
     print("="*50)
     pause()
     main_menu()
@@ -62,6 +56,8 @@ def main_menu():
             await choice()
             # unfortunately there seems no way simple enough to programmatically convert
             # this to async/await in Pyodide, so we just prepend `await` for select functions
+            # workaround: One could just add a small `sleep(0.1)` command to any function that isn't already an async function to all choice() calls would be await calls and the if condition could be removed.
+            # update: transformInputToAsync.js now has an array variable ALSO_TRANSFORM into which you can add a function name to always set to async/await. Therefore it's most possible to have python code that doesn't need to be specially adapted to work with Pyodide.
         else:
             choice()
 

@@ -2,6 +2,9 @@
 // Node.js script to transform Python functions using input() to async/await style
 // Usage: node transformInputToAsync.js <python_file.py>
 
+// List of additional function names that should be transformed to use await
+const ALSO_TRANSFORM = ["custom_function_name"];  // Add function names without parentheses
+
 import { debug } from './debugUtils.js';
 const MODULE_NAME = 'transformInputToAsync.js';
 
@@ -39,16 +42,39 @@ function findFunctionsWithInputOrSleep(code) {
             const bodyNoComments = bodyLines.join('\n').replace(/#.*$/gm, '');
             debug(MODULE_NAME, `Function '${name}' body has ${bodyLines.length} lines`);
             
-            // Check for both input() and time.sleep()
+            // Check for built-in async calls (input and sleep)
             const hasInput = /\binput\s*\(/.test(bodyNoComments);
             const hasSleep = /\btime\.sleep\s*\(/.test(bodyNoComments);
-            debug(MODULE_NAME, `Function '${name}': hasInput=${hasInput}, hasSleep=${hasSleep}`);
             
-            if (hasInput || hasSleep) {
-                debug(MODULE_NAME, `✓ Adding function '${name}' to results (contains input() or time.sleep())`);
+            // Check for additional transforms from configuration
+            const customTransforms = ALSO_TRANSFORM.map(fnName => {
+                return {
+                    name: fnName,
+                    // More precise regex that only matches function calls
+                    has: !(/["'`]/.test(bodyNoComments.charAt(bodyNoComments.indexOf(fnName) - 1))) && new RegExp(`\\b${fnName}\\s*\\(`).test(bodyNoComments)
+                };
+            });
+            
+            const hasCustom = customTransforms.some(t => t.has);
+            
+            // Debug output
+            const checks = [
+                `hasInput=${hasInput}`,
+                `hasSleep=${hasSleep}`,
+                ...customTransforms.map(t => `has${t.name}=${t.has}`)
+            ].join(', ');
+            debug(MODULE_NAME, `Function '${name}': ${checks}`);
+            
+            if (hasInput || hasSleep || hasCustom) {
+                const reason = [
+                    hasInput && 'input()',
+                    hasSleep && 'time.sleep()',
+                    ...customTransforms.filter(t => t.has).map(t => `${t.name}()`)
+                ].filter(Boolean).join(', ');
+                debug(MODULE_NAME, `✓ Adding function '${name}' to results (contains ${reason})`);
                 results.push({ name, line: i + 1 });
             } else {
-                debug(MODULE_NAME, `✗ Skipping function '${name}' (no input() or time.sleep())`);
+                debug(MODULE_NAME, `✗ Skipping function '${name}' (no async calls found)`);
             }
         }
     }
@@ -71,12 +97,16 @@ function findFunctionCalls(code, functionNames) {
     
     lines.forEach((line, idx) => {
         for (const name of functionNames) {
-            // More robust regex that handles function calls better
-            const callRegex = new RegExp(`(?<!def\\s+)\\b${name}\\s*\\(`, 'g');
+            // Safari-compatible version that doesn't use lookbehind
+            const defCheck = !line.trim().startsWith('def ');
+            const callRegex = new RegExp(`\\b${name}\\s*\\(`, 'g');
             let match;
             while ((match = callRegex.exec(line)) !== null) {
-                debug(MODULE_NAME, `Found call to '${name}' at line ${idx + 1}: ${line.trim()}`);
-                calls[name].push({ line: idx + 1, text: line.trim() });
+                // Only process if this isn't a function definition
+                if (defCheck) {
+                    debug(MODULE_NAME, `Found call to '${name}' at line ${idx + 1}: ${line.trim()}`);
+                    calls[name].push({ line: idx + 1, text: line.trim() });
+                }
             }
         }
     });
@@ -160,6 +190,31 @@ function transformPythonCode(code, functionInfos, calls) {
         }
     }
     debug(MODULE_NAME, `Applied await to ${sleepTransforms} time.sleep() calls`);
+
+    // Transform configured custom function calls to await calls
+    for (const fnName of ALSO_TRANSFORM) {
+        debug(MODULE_NAME, `--- Adding await to ${fnName}() calls ---`);
+        let transforms = 0;
+        
+        for (let i = 0; i < lines.length; i++) {
+            // More precise regex that only matches function calls, not strings
+            const fnRegex = new RegExp(`\\b${fnName}\\s*\\(`);
+            const awaitRegex = new RegExp(`\\bawait\\s+${fnName}\\s*\\(`);
+            
+            // Only add await if it's not already there and not in a string
+            if (fnRegex.test(lines[i]) && !awaitRegex.test(lines[i])) {
+                // Check if the match is inside a string
+                const matchIndex = lines[i].search(fnRegex);
+                const charBefore = lines[i].charAt(matchIndex - 1);
+                if (/["'`]/.test(charBefore)) continue;  // Skip if inside a string
+                const oldLine = lines[i];
+                lines[i] = lines[i].replace(fnRegex, `await ${fnName}(`);
+                debug(MODULE_NAME, `Line ${i + 1}: '${oldLine}' → '${lines[i]}'`);
+                transforms++;
+            }
+        }
+        debug(MODULE_NAME, `Applied await to ${transforms} ${fnName}() calls`);
+    }
     
     debug(MODULE_NAME, '=== transformPythonCode END ===');
     return lines.join('\n');
