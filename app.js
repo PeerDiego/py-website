@@ -122,7 +122,8 @@ Promise.all([
     setDebugModules({
         'app.js': true,
         'concatenatePrints.js': false,
-        'transformInputToAsync.js': false
+        'transformInputToAsync.js': false,
+        'storage': false
     });
 }).catch(err => {
     earlyLog(`ERROR in module loading: ${err.message}`);
@@ -141,6 +142,7 @@ const runScriptButton = document.getElementById('run-script-button');
 const clearButton = document.getElementById('clear-button');
 const status = document.getElementById('status');
 const pythonVersion = document.getElementById('python-version');
+const header = document.querySelector('header');
 
 // Log DOM element status
 earlyLog('DOM elements status:');
@@ -154,25 +156,59 @@ earlyLog(`python-version: ${pythonVersion ? 'YES' : 'NO'}`);
 
 // Cookie utility functions
 function setCookie(name, value, days = 30) {
-    const expires = new Date();
-    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
-    document.cookie = `${name}=${JSON.stringify(value)};expires=${expires.toUTCString()};path=/`;
+    try {
+        const expires = new Date();
+        expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+        const jsonValue = JSON.stringify(value);
+        debug('storage', 'Setting cookie. JSON value:', jsonValue);
+        debug('storage', 'JSON length:', jsonValue.length);
+        
+        // More explicit cookie setting with security attributes
+        const cookieValue = encodeURIComponent(jsonValue);
+        const cookie = [
+            `${name}=${cookieValue}`,
+            `expires=${expires.toUTCString()}`,
+            'path=/',
+            'SameSite=Lax'
+        ].join(';');
+        
+        debug('storage', 'Setting cookie with:', cookie);
+        document.cookie = cookie;
+        
+        // Verify the cookie was set
+        const allCookies = document.cookie;
+        debug('storage', 'All cookies after set:', allCookies);
+        debug('storage', 'Cookie set complete');
+    } catch (e) {
+        console.error('Error in setCookie:', e);
+        throw e;
+    }
 }
 
 function getCookie(name) {
+    debug('storage', 'Getting cookie:', name);
+    debug('storage', 'All cookies:', document.cookie);
+    
     const nameEQ = name + "=";
     const ca = document.cookie.split(';');
+    debug('storage', 'Cookie array:', ca);
+    
     for(let i = 0; i < ca.length; i++) {
         let c = ca[i];
         while (c.charAt(0) === ' ') c = c.substring(1, c.length);
         if (c.indexOf(nameEQ) === 0) {
             try {
-                return JSON.parse(c.substring(nameEQ.length, c.length));
+                const encodedValue = c.substring(nameEQ.length, c.length);
+                const decodedValue = decodeURIComponent(encodedValue);
+                debug('storage', 'Found cookie value:', decodedValue);
+                return JSON.parse(decodedValue);
             } catch(e) {
+                debug('storage', 'Error parsing cookie:', e);
                 return null;
             }
         }
     }
+    debug('storage', 'Cookie not found');
     return null;
 }
 
@@ -184,23 +220,64 @@ function deleteCookie(name) {
 function saveAppData(data, key = 'app_data') {
     // Convert Python object to JavaScript object if needed
     let jsData;
-    if (data && typeof data.toJs === 'function') {
-        // If it's a PyProxy object with toJs method, convert it
-        // Use Object.fromEntries to convert Map to plain Object for JSON serialization
-        jsData = data.toJs({dict_converter: Object.fromEntries});
-    } else {
-        // Otherwise assume it's already a JavaScript object
-        jsData = data;
-    }
+    debug('storage', 'saveAppData received:', data);
+    debug('storage', 'data type:', typeof data);
+    debug('storage', 'data toJs exists:', typeof data.toJs === 'function');
     
-    setCookie(key, jsData);
-    console.log(`App data saved to cookie (${key}):`, jsData);
-    return true; // Return success indicator
+    try {
+        if (data && typeof data.toJs === 'function') {
+            // If it's a PyProxy object with toJs method, convert it
+            debug('storage', 'Converting PyProxy to JS...');
+            jsData = data.toJs({dict_converter: Object.fromEntries});
+            debug('storage', 'Conversion result:', jsData);
+        } else {
+            // Otherwise assume it's already a JavaScript object
+            jsData = data;
+        }
+        
+        // Try to save both ways for maximum reliability
+        debug('storage', 'About to set cookie with:', jsData);
+        setCookie(key, jsData);
+        
+        // Also save to localStorage as backup
+        try {
+            localStorage.setItem(key, JSON.stringify(jsData));
+            debug('storage', 'Saved to localStorage');
+        } catch (storageErr) {
+            debug('storage', 'Could not save to localStorage:', storageErr);
+        }
+        
+        // Verify the save
+        const savedCookie = getCookie(key);
+        const savedStorage = localStorage.getItem(key);
+        debug('storage', 'Verification - Cookie:', savedCookie);
+        debug('storage', 'Verification - localStorage:', savedStorage);
+        
+        return true; // Return success indicator
+    } catch (e) {
+        console.error('Error in saveAppData:', e);
+        return false;
+    }
 }
 
 function loadAppData(key = 'app_data') {
-    const savedData = getCookie(key);
-    console.log(`App data loaded from cookie (${key}):`, savedData);
+    // Try localStorage first
+    let savedData = null;
+    try {
+        const storageData = localStorage.getItem(key);
+        if (storageData) {
+            savedData = JSON.parse(storageData);
+            debug('storage', `App data loaded from localStorage (${key}):`, savedData);
+        }
+    } catch (e) {
+        debug('storage', 'Error loading from localStorage:', e);
+    }
+    
+    // If localStorage failed, try cookie as fallback
+    if (!savedData) {
+        savedData = getCookie(key);
+        debug('storage', `App data loaded from cookie (${key}):`, savedData);
+    }
     
     // Return the data as-is - it should be a proper JavaScript object
     // that Python can convert using .to_py()
@@ -209,7 +286,7 @@ function loadAppData(key = 'app_data') {
 
 function clearAppData(key = 'app_data') {
     deleteCookie(key);
-    console.log(`App data cleared from cookie (${key})`);
+    debug('storage', `App data cleared from cookie (${key})`);
     return true; // Return success indicator
 }
 
@@ -445,6 +522,12 @@ async function runPythonProgram() {
         return;
     }
     
+    // Disable the Play Game button once clicked
+    runScriptButton.disabled = true;
+    
+    // Add compact header class for mobile/tablet views
+    header.classList.add('game-running');
+    
     // swapping for a debug message instead
     // addMessage('system', 'Starting Python program...');
     debug('app.js', 'Starting Python program...');
@@ -465,7 +548,12 @@ await main()
         `;
         
         await pyodide.runPythonAsync(asyncProgram);
+
+        // Re-enable the Play Game button and restore header
+        runScriptButton.disabled = false;
+        header.classList.remove('game-running');
         addMessage('system', 'Game finished. Click "Play Game" to start again.');
+        runScriptButton.focus();
     } catch (error) {
         console.error('Program execution error:', error);
         addMessage('error', `Program error: ${error.message}`);

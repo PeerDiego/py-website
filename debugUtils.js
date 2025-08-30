@@ -4,7 +4,8 @@
 const debugSettings = {
     'app.js': false,
     'concatenatePrints.js': false,
-    'transformInputToAsync.js': false
+    'transformInputToAsync.js': false,
+    'storage': false
 };
 
 /**

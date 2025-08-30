@@ -39,16 +39,22 @@ header {
     color: white;
     padding: 20px;
     text-align: center;
+    transition: padding 2s ease;
+    min-height: 55px; /* Based on the computed height shown in devtools */
 }
 
 header h1 {
     margin-bottom: 5px;
     font-size: 2rem;
+    transition: all 2s ease;
 }
 
 header p {
     opacity: 0.9;
     font-size: 1rem;
+    max-height: 100px;
+    margin-top: 5px;
+    transition: all 2s ease;
 }
 
 .chat-container {
@@ -337,6 +343,25 @@ button:disabled {
         border-radius: 8px;
     }
 
+    /* Compact header when game is running */
+    header.game-running {
+        padding: 12px 10px;  /* Increased from 8px to 12px top/bottom */
+    }
+    
+    header.game-running h1 {
+        font-size: 1.3rem;
+        margin: 0;  /* Reset margins */
+        line-height: 31px;  /* Match the header's min-height */
+        height: 31px;  /* Explicit height to match min-height */
+    }
+    
+    header.game-running p {
+        opacity: 0;
+        margin-top: -20px;
+        max-height: 0;
+        overflow: hidden;
+    }
+
     /* Header adjustments */
     header {
         padding: 15px 10px;
@@ -413,6 +438,24 @@ button:disabled {
 @media screen and (min-width: 601px) and (max-width: 900px) {
     header h1 {
         font-size: 1.8rem;
+    }
+
+    /* Compact header when game is running */
+    header.game-running {
+        padding: 15px;  /* Slightly more padding */
+    }
+    
+    header.game-running h1 {
+        font-size: 1.5rem;
+        margin-bottom: 2px;  /* Small margin instead of 0 */
+        line-height: 1.2;  /* Ensure enough height for the text */
+    }
+    
+    header.game-running p {
+        opacity: 0;
+        margin-top: -20px;
+        max-height: 0;
+        overflow: hidden;
     }
 
     .python-message .message-content {

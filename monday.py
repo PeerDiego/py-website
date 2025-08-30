@@ -48,6 +48,7 @@ except ImportError:
 #---------------------------------------
 # Game State Management
 #---------------------------------------
+
 state = {
     # Core Statistics
     "times_played"      : 0,  # Number of times game has been played
@@ -56,7 +57,276 @@ state = {
     "hints_seen"        : 0,  # Number of unique hints the player has viewed
     "total_choices"     : 0,  # Total number of choices made
     "choices_count"     : 0,  # Choices made in current session
+    
+    # Death Tracking
+    "deaths": {
+        "oversleeping": {
+            "discovered": False,
+            "description": "Overslept and missed the bus",
+            "count": 0
+        },
+        "mob_hit": {
+            "discovered": False,
+            "description": "Smashed stereo containing mob boss's CD",
+            "count": 0
+        },
+        "anvil": {
+            "discovered": False,
+            "description": "Found government secrets and met an anvil",
+            "count": 0
+        },
+        "electrocution": {
+            "discovered": False,
+            "description": "Tried to get Pop-Tart out with a fork",
+            "count": 0
+        },
+        "broken_jaw": {
+            "discovered": False,
+            "description": "Broke jaw on frozen pizza",
+            "count": 0
+        },
+        "no_hygiene": {
+            "discovered": False,
+            "description": "Didn't brush teeth before packing bag",
+            "count": 0
+        },
+        "skip_breakfast": {
+            "discovered": False,
+            "description": "Skipped the most important meal of the day",
+            "count": 0
+        },
+        "unwashed_breakfast": {
+            "discovered": False,
+            "description": "Ate breakfast with unwashed hands",
+            "count": 0
+        },
+        "starvation": {
+            "discovered": False,
+            "description": "Forgot school supplies and starved to death",
+            "count": 0
+        },
+        "psycho": {
+            "discovered": False,
+            "description": "Met a psycho in Monica Lewinsky mask",
+            "count": 0
+        },
+        "mcdonalds_fry": {
+            "discovered": False,
+            "description": "Heart attack from one McDonald's fry",
+            "count": 0
+        },
+        "sun_blindness": {
+            "discovered": False,
+            "description": "Blinded by sun while crossing street",
+            "count": 0
+        },
+        "live_tuna": {
+            "discovered": False,
+            "description": "Eaten by live tuna sandwich at airport",
+            "count": 0
+        },
+        "iraq_guards": {
+            "discovered": False,
+            "description": "Mistaken for assassin in Iraq",
+            "count": 0
+        },
+        "donkey_kong": {
+            "discovered": False,
+            "description": "Thrown into oblivion by Donkey Kong",
+            "count": 0
+        },
+        "hostage_fail": {
+            "discovered": False,
+            "description": "Failed to help TI-83 hostage situation",
+            "count": 0
+        },
+        "walk_texas": {
+            "discovered": False,
+            "description": "Tried walking home from Texas",
+            "count": 0
+        },
+        "book_indigestion": {
+            "discovered": False,
+            "description": "Severe indigestion from eating alien book",
+            "count": 0
+        },
+        "math_fail": {
+            "discovered": False,
+            "description": "Failed basic math in Area 51",
+            "count": 0
+        },
+        "toilet_flush": {
+            "discovered": False,
+            "description": "Flushed down Area 51 toilet",
+            "count": 0
+        },
+        "toilet_drink": {
+            "discovered": False,
+            "description": "Drank from Area 51 toilet",
+            "count": 0
+        },
+        "toxic_nap": {
+            "discovered": False,
+            "description": "Napped in toxic Area 51 bathroom",
+            "count": 0
+        },
+        "alien_blood": {
+            "discovered": False,
+            "description": "Dissolved by alien's acidic blood",
+            "count": 0
+        },
+        "ymca_smack": {
+            "discovered": False,
+            "description": "Smacked for singing YMCA with aliens",
+            "count": 0
+        },
+        "alien_dance": {
+            "discovered": False,
+            "description": "Died of embarrassment dancing with aliens",
+            "count": 0
+        },
+        "final_loser": {
+            "discovered": False,
+            "description": "Gave up at the very end",
+            "count": 0
+        },
+        "hand_falls_off": {
+            "discovered": False,
+            "description": "Hand fell off writing essay",
+            "count": 0
+        },
+        "reject_girl": {
+            "discovered": False,
+            "description": "Said 'hell no' to the girl",
+            "count": 0
+        },
+        "methane_gas": {
+            "discovered": False,
+            "description": "Choked on methane gas in library",
+            "count": 0
+        },
+        "mad_cow": {
+            "discovered": False,
+            "description": "Got mad cow disease from beef taco",
+            "count": 0
+        },
+        "salmonella": {
+            "discovered": False,
+            "description": "Got salmonella from chicken",
+            "count": 0
+        },
+        "seizure": {
+            "discovered": False,
+            "description": "Had seizure from computer screen",
+            "count": 0
+        },
+        "acid_face": {
+            "discovered": False,
+            "description": "Face fell in hydrochloric acid",
+            "count": 0
+        },
+        "refused_donut": {
+            "discovered": False,
+            "description": "Refused to give donut to linebacker",
+            "count": 0
+        },
+        "monday_revenge": {
+            "discovered": False,
+            "description": "Hit with Monday's best shot",
+            "count": 0
+        },
+        "car_accident": {
+            "discovered": False,
+            "description": "Ran to bus without looking both ways",
+            "count": 0
+        },
+        "cement": {
+            "discovered": False,
+            "description": "Sat in wet cement at bus stop",
+            "count": 0
+        },
+        "spiteful_driver": {
+            "discovered": False,
+            "description": "Mooned the bus driver",
+            "count": 0
+        },
+        "bad_neighborhood": {
+            "discovered": False,
+            "description": "Fell asleep on bus in bad neighborhood",
+            "count": 0
+        },
+        "lost_forever": {
+            "discovered": False,
+            "description": "Got lost in school halls forever",
+            "count": 0
+        },
+        "brain_overheat": {
+            "discovered": False,
+            "description": "Brain overheated from studying",
+            "count": 0
+        },
+        "computer_explosion": {
+            "discovered": False,
+            "description": "Computer exploded checking email",
+            "count": 0
+        },
+        "choked_tongue": {
+            "discovered": False,
+            "description": "Choked on tongue during speed debate",
+            "count": 0
+        },
+        "gameboy_rage": {
+            "discovered": False,
+            "description": "Died from Gameboy rage after batteries died",
+            "count": 0
+        },
+        "annie_cd": {
+            "discovered": False,
+            "description": "Jumped from bus after hearing Annie soundtrack",
+            "count": 0
+        },
+        "buffalo_stampede": {
+            "discovered": False,
+            "description": "Run down by raging buffalo with dream girl",
+            "count": 0
+        },
+        "alien_abduction": {
+            "discovered": False,
+            "description": "Abducted by aliens walking home",
+            "count": 0
+        },
+        "bus_window": {
+            "discovered": False,
+            "description": "Thrown out bus window for no reason",
+            "count": 0
+        },
+        "quit_early": {
+            "discovered": False,
+            "description": "Tried to go home early",
+            "count": 0
+        },
+        "airport_quit": {
+            "discovered": False,
+            "description": "Tried to go home from airport",
+            "count": 0
+        },
+        "texas_karma": {
+            "discovered": False,
+            "description": "Bad karma caught up in Texas",
+            "count": 0
+        }
+    }
 }
+
+def record_death(death_type):
+    """Record a death of a specific type in the game state"""
+    if death_type in state["deaths"]:
+        if not state["deaths"][death_type]["discovered"]:
+            state["deaths"][death_type]["discovered"] = True
+            print(f"\nNew death discovered: {state['deaths'][death_type]['description']}")
+        state["deaths"][death_type]["count"] += 1
+    else:
+        print(f"Death cause '{death_type}' not found :(   Please tell the dev.")
 
 def reset_saved_stats():
     state["times_played"]      = 0
@@ -65,6 +335,10 @@ def reset_saved_stats():
     state["hints_seen"]        = 0
     state["total_choices"]     = 0
     state["choices_count"]     = 0
+    # Reset death tracking
+    for death in state["deaths"]:
+        state["deaths"][death]["discovered"] = False
+        state["deaths"][death]["count"] = 0
 
 def initialize_game_state():
     """Reset the game state to default values for a new game."""
@@ -81,7 +355,7 @@ initialize_game_state()
 # Core Game Utilities
 #---------------------------------------
 
-def pause(prompt = "Press Send to continue..."):
+def pause(prompt = "Press Enter to continue..."):
     # Print prompt, wait for Enter, then overwrite the prompt line with spaces
     input(prompt)  # Removed the \n to keep the prompt on same line
     # Move cursor up one line and clear it - not needed for web version
@@ -102,7 +376,7 @@ def menu(title, options, count_choice=True):
     
     while state["running"]:
         try:
-            choice = int(input("Choose: "))
+            choice = int(input("Type in your choice: "))
             if 1 <= choice <= len(options):
                 if count_choice:
                     state["choices_count"] += 1  # Increment choice counter
@@ -125,7 +399,8 @@ SAVEABLE_STATS = [
     "times_won",
     "times_good_ending",
     "hints_seen",
-    "total_choices"
+    "total_choices",
+    "deaths"
 ]
 
 def get_fernet():
@@ -148,7 +423,7 @@ def save_stats():
     
     if PYODIDE_ENV:
         # Use browser's localStorage via Pyodide bridge
-        save_data(saveable_data, "monday_stats")
+        success = save_data(saveable_data, "monday_stats")
     else:
         # Use local file encryption
         if not CRYPTO_AVAILABLE:
@@ -161,11 +436,9 @@ def save_stats():
 
 def load_stats():
     """Load game statistics from persistent storage"""
-    loaded_state = {}
-    
     if PYODIDE_ENV:
         # Load from browser's localStorage
-        loaded_state = load_data("monday_stats") or {}
+        loaded_data = load_data("monday_stats") or {}
     else:
         # Load from encrypted local file
         if not CRYPTO_AVAILABLE or not os.path.exists(SAVE_FILE):
@@ -177,25 +450,39 @@ def load_stats():
             data = f.decrypt(token).decode()
             try:
                 # Try loading as JSON first
-                loaded_state = json.loads(data)
+                loaded_data = json.loads(data)
             except json.JSONDecodeError:
                 # Fall back to old CSV format
                 stats = [int(x) for x in data.split(",")]
-                loaded_state = {
+                loaded_data = {
                     "times_played": stats[0],
                     "times_won": stats[1],
                     "times_good_ending": stats[2],
                     "hints_seen": stats[3] if len(stats) > 3 else 0,
                     "total_choices": stats[4] if len(stats) > 4 else 0
                 }
-        except Exception:
+        except Exception as e:
+            print("Error loading save file:", e)
             reset_saved_stats()
             return
-            
-    # Update state with loaded values
-    for key in SAVEABLE_STATS:
-        if key in loaded_state:
-            state[key] = loaded_state[key]
+
+    def deep_update(target, source):
+        """Recursively update nested dictionaries."""
+        for key, value in source.items():
+            if key in target:
+                if isinstance(value, dict) and isinstance(target[key], dict):
+                    deep_update(target[key], value)
+                else:
+                    target[key] = value
+        return target
+
+    # Update existing state with saved values instead of replacing
+    for key, value in loaded_data.items():
+        if key in state:
+            if isinstance(value, dict) and isinstance(state[key], dict):
+                deep_update(state[key], value)
+            else:
+                state[key] = value
 
 def clear_stats():
     """Clear game statistics from persistent storage"""
@@ -210,11 +497,15 @@ def clear_stats():
         if os.path.exists(SAVE_FILE):
             os.remove(SAVE_FILE)
         print("Save cleared.")
+    save_stats()
     
 def title_screen():
-    print("\nA MODERN ADVENTURE OF EPIC PROPORTIONS")
-    wait()
-    print("\n    {}{}{}{}{}{}{}{}{}{}{}\n   {{{{{{{{ MONDAY }}}}}}}}\n    {}{}{}{}{}{}{}{}{}{}{}\n\n       SPECIAL EDITION")
+    print("\nA MODERN ADVENTURE OF EPIC PROPORTIONS\n")
+    wait(1.5)
+    print("    {}{}{}{}{}{}{}{}{}{}{}\n   {{{{{{{{ MONDAY }}}}}}}}\n    {}{}{}{}{}{}{}{}{}{}{}\n")
+    wait(1.5)
+    print("       SPECIAL EDITION\n\n")
+    wait(1.5)
     pause()
     main_menu()
 
@@ -235,52 +526,74 @@ def main_menu():
 def pointless_info():
     def once_or_x_times(integer, end_punctutation="."):
         return ("ONCE" if integer == 1 else f"{integer} TIMES") + end_punctutation
+    wait_coefficient = 1.0 - min(state["times_played"] // 10, 5) * 0.18
     print("\nHERE'S SOME USELESS INFORMATION.")
     pause()
     print("YOU HAVE PLAYED THIS GAME", once_or_x_times(state["times_played"]))
-    wait(1)
+    wait(1 * wait_coefficient)
     if state["times_played"] == 0:
         print("WHAT ARE YOU WAITING FOR? START THE GAME.")
         if state["hints_seen"]:
-            wait()
+            wait(1 * wait_coefficient)
             print("\nWAIT! YOU CHECKED OUT HINTS BEFORE EVEN TRYING THE GAME?? HOW LAME. ┑(￣Д ￣)┍")
-            wait(4)
+            wait(4 * wait_coefficient)
         return
     if state["choices_count"]:
         print(F"YOU HAVE MADE {state['choices_count']} CHOICE{'' if state['choices_count'] == 1 else 'S'} THIS ROUND.")
-    wait(1)
+    wait(1 * wait_coefficient)
     if state["total_choices"] and state["total_choices"] != state["choices_count"]:
         print(F"YOU HAVE MADE {state['total_choices']} CHOICE{'' if state['total_choices'] == 1 else 'S'}{', IN TOTAL' if state['choices_count'] != 0 else ''}.")
-    wait(1)
+    wait(1 * wait_coefficient)
     print(f"YOU HAVE WON", once_or_x_times(state["times_won"]), 
           " >_> <_<" if state['times_won'] > state['times_played'] else "")
-    wait(1)
+    wait(1 * wait_coefficient)
     if state["hints_seen"]:
             print(F"YOU HAVE VIEWED {'ONLY ONE' if state['hints_seen'] == 1 else state['hints_seen']} HINT{'' if state['hints_seen'] == 1 else 'S'}.")
-    wait(1.5)
+    wait(1.5 * wait_coefficient)
     if state['times_good_ending'] > 0:
         print("AND YOU ACTUALLY WON", once_or_x_times(state["times_good_ending"], end_punctutation="!"), "NOT THAT FAKE PARTICIPATION MEDAL WIN.")
-        wait()
+        wait(1 * wait_coefficient)
         if state["total_choices"] == 40:
             print("WOW! YOU SMASHED THE GOOD ENDING IN THE MINIMUM POSSIBLE CHOICES!")
-            wait(3)
+            wait(3 * wait_coefficient)
             print("YOU F***ING ROCK!!!")
-            wait(4)
+            wait(4 * wait_coefficient)
         elif state["total_choices"] == 42:
             print("WOW! YOU FORCED THE GOOD ENDING IN ALMOST THE LEAST AMOUNT OF CHOICES!")
             print("THINK YOU CAN DO IT IN LESS?")
-            wait(3)
+            wait(3 * wait_coefficient)
         if state["hints_seen"] == 0:
             print("HOLY CRAP! AND YOU DID IT WITHOUT ANY HINTS! IMPRESSIVE!!")
             wait()
+    
+    # Show death statistics
+    total_deaths = len(state["deaths"])
+    discovered_deaths = sum(1 for death in state["deaths"].values() if death["discovered"])
+    if discovered_deaths == 0 and state["times_played"]:
+        wait(1 * wait_coefficient)
+        print("\nYOU HAVEN'T DISCOVERED ANY DEATHS YET. WHAT KIND OF MONDAY PLAYER ARE YOU?")
+        print("THERE ARE SO MANY WAYS TO DIE, AND YOU HAVEN'T FOUND A SINGLE ONE! ¯\\_(ツ)_/¯")
+    elif discovered_deaths == total_deaths:
+        wait(1 * wait_coefficient)
+        print("\nINCREDIBLE! YOU'VE DISCOVERED EVERY POSSIBLE WAY TO DIE!")
+        print("YOU ARE THE ULTIMATE MASTER OF MONDAY MAYHEM! (╯°□°）╯︵ ┻━┻")
+    if discovered_deaths > 0:
+        print(f"\nYOU'VE DISCOVERED {discovered_deaths} UNIQUE WAY{'S' if discovered_deaths !=1 else ''} TO DIE!")
+        wait(1 * wait_coefficient)
+        for death_type, info in state["deaths"].items():
+            if info["discovered"]:
+                print("-", info['description'].upper(), once_or_x_times(info['count'], end_punctutation=""))
+                wait(0.5 * wait_coefficient)
+        wait(1 * wait_coefficient)
+    
     if state['times_won'] == 0:
         if state['total_choices'] > 20:
-            print("YOU'RE WELL ON YOUR WAY. KEEP GOING!")
+            print("\nYOU'RE WELL ON YOUR WAY. KEEP GOING!")
         elif state['times_played']:
-            print("KEEP ON TRYING.")
+            print("\nKEEP ON TRYING.")
     elif (state['times_won'] or state['times_played']) and not state['times_good_ending']:
         print("YOU'RE GETTING THE HANG OF IT.")
-    wait(1)
+    wait(1 * wait_coefficient)
     # Return to main menu
 
 def hints():
@@ -478,8 +791,8 @@ def wakeup_menu():
 
 def snooze():
     if state["snooze_count"] == 2:
-        print("YOU'VE OVERSLEPT\nYOU MISS YOUR BUS AND YOU TRY TO WALK TO SCHOOL.\nOF COURSE YOU DON'T MAKE IT!\nWHAT KIND OF GAME DO YOU THINK THIS IS?!?")
-        game_over()
+        print("YOU OVERSLEPT\nYOU MISS YOUR BUS AND YOU TRY TO WALK TO SCHOOL.\nOF COURSE YOU DON'T MAKE IT!\nWHAT KIND OF GAME DO YOU THINK THIS IS?!?")
+        game_over("oversleeping")
         return True
     print("ZZZZZ...")
     pause()
@@ -488,7 +801,7 @@ def snooze():
 
 def smash_stereo():
     print("YOU GRAB YOUR BASEBALL BAT AND BEGIN DESTROYING YOUR STEREO.\nIT IS NOW A PILE OF SPARE PARTS.\nBUT YOU FORGOT ABOUT YOUR FRIEND'S CD.\nAND HIS DAD IS A MOB KINGPIN!\nOH CRAP")
-    game_over()
+    game_over("mob_hit")
     return True
 
 def get_up():
@@ -529,7 +842,7 @@ def breakfast_menu():
 
 def eat_breakfast():
     print("YOU DIDN'T WASH YOUR HANDS. THAT'S SICK! THE GERMS EVENTUALLY OVERRUN YOU.")
-    game_over()
+    game_over("unwashed_breakfast")
 
 def wash_hands():
     print("YOU WASHED YOUR HANDS. GOOD JOB YOU'RE NOT NEARLY AS UNSANITARY AS I THOUGHT!")
@@ -538,7 +851,7 @@ def wash_hands():
 
 def skip_breakfast():
     print("BREAKFAST IS THE MOST IMPORTANT MEAL OF THE DAY! BUT YOU SKIPPED IT, NOW DID YOU?")
-    game_over()
+    game_over("skip_breakfast")
 
 def after_wash():
     print("YOU ARE HUNGRY, SO YOU HAVE BREAKFAST.")
@@ -551,11 +864,11 @@ def food_menu():
 
 def poptart():
     print("IT IS STUCK IN THE TOASTER SO YOU TRY TO PRY IT OUT WITH A FORK. METAL CONDUCTS ELECTRICITY, FOOL!")
-    game_over()
+    game_over("electrocution")
 
 def frozen_pizza():
     print("YOU FORGET TO DEFROST IT AND BREAK YOUR JAW.")
-    game_over()
+    game_over("broken_jaw")
 
 def cereal():
     print("YUM!")
@@ -568,7 +881,7 @@ def pack_bag_menu():
 
 def pack_bag():
     print("DISGUSTING! YOU DIDN'T BRUSH YOUR TEETH!")
-    game_over()
+    game_over("no_hygiene")
 
 def brush_teeth():
     print("YOU RINSE OFF WHAT APPEARS TO BE CYANIDE, AND BRUSH...")
@@ -586,7 +899,7 @@ def pack_bag2():
 
 def leave_for_bus():
     print("YOU FORGOT YOUR STUFF! YOU GET ALL F'S AND DON'T GO TO COLLEGE, NEVER GET A JOB AND STARVE TO DEATH.")
-    game_over()
+    game_over("starvation")
 
 def bus_menu():
     choice = menu("   BAG PACKED.   ", [("GO TO BUS STOP", get_to_bus_stop), ("BACK TO BED", back_to_bed)])
@@ -597,8 +910,8 @@ def get_to_bus_stop():
     choice()
 
 def back_to_bed():
-    print("YOU GO BACK TO YOUR ROOM. THERE IS A PSYCHO WAITING FOR YOU... WEARING A MONICA LEWENSKI MASK...")
-    game_over()
+    print("YOU GO BACK TO YOUR ROOM. THERE IS A PSYCHO WAITING FOR YOU... WEARING A MONICA LEWINSKI MASK...")
+    game_over("psycho")
 
 def walk_to_bus():
     print("YOU GET TO THE BUS STOP.")
@@ -607,7 +920,7 @@ def walk_to_bus():
 
 def run_to_bus():
     print("YOU FORGET TO LOOK BOTH WAYS.")
-    game_over()
+    game_over("car_accident")
 
 def at_bus_stop():
     choice = menu("AT THE BUS STOP ", [("SIT", sit_at_bus), ("STAND", stand_at_bus)])
@@ -615,7 +928,7 @@ def at_bus_stop():
 
 def sit_at_bus():
     print("A CAR RUNS YOU DOWN. WHY? YOU SAT IN THE WET CEMENT THAT SOME JOKER LEFT AND YOU WERE UNABLE TO AVOID A CAR DRIVING ON THE SIDEWALK.")
-    game_over()
+    game_over("cement")
 
 def stand_at_bus():
     print("AN 18-WHEELER NEARLY RUNS YOU DOWN. GOOD THING YOU ARE VERY AGILE.")
@@ -635,7 +948,7 @@ def get_on_bus():
 
 def moon_driver():
     print("THE DRIVER RUNS YOU DOWN OUT OF SPITE.")
-    game_over()
+    game_over("spiteful_driver")
 
 def on_bus_menu():
     choice = menu("   ON THE BUS   ", [("SLEEP", sleep_on_bus), ("STAY AWAKE", stay_awake_on_bus)])
@@ -643,7 +956,7 @@ def on_bus_menu():
 
 def sleep_on_bus():
     print("YOU WAKE UP IN A BAD NEIGHBORHOOD...")
-    game_over()
+    game_over("bad_neighborhood")
 
 def stay_awake_on_bus():
     print("YOU FINALLY ARRIVE AT SCHOOL")
@@ -656,7 +969,7 @@ def at_school_menu():
 
 def roam_halls():
     print("YOU GET LOST, NEVER TO BE SEEN AGAIN.")
-    game_over()
+    game_over("lost_forever")
 
 def go_to_library():
     print("YOU'RE IN THE LIBRARY.")
@@ -669,7 +982,7 @@ def in_library_menu():
 
 def study():
     print("YOUR BRAIN OVERHEATS...")
-    game_over()
+    game_over("brain_overheat")
 
 def go_online():
     print("YOU GO ONLINE.")
@@ -682,7 +995,7 @@ def where_to_online():
 
 def cia_gov():
     print("YOU MISTAKENLY FIND GOVERNMENT SECRETS AND YOU ARE LATER KILLED \"ACCIDENTALLY\". WHEN AN ANVIL IS DROPPED ON YOUR HEAD.")
-    game_over()
+    game_over("anvil")
 
 def hentai_site():
     print("IT'S BLOCKED BY SURFWATCH!")
@@ -738,7 +1051,7 @@ def team_debate():
     print("YOU SPEAK AS FAST AS YOU POSSIBLY CAN.")
     pause()
     print("BUT SOMEWHERE ALONG THE WAY, YOU CHOKE ON YOUR TONGUE.")
-    game_over()
+    game_over("choked_tongue")
 
 def original_oratory():
     print("YOU CHOOSE ORIGINAL ORATORY")
@@ -764,7 +1077,7 @@ def debate_ti83():
 
 def debate_email():
     print("YOU CHECK YOUR E-MAIL. AND THE COMPUTER EXPLODES.")
-    game_over()
+    game_over("computer_explosion")
 
 def next_class_menu():
     choice = menu("   WHERE TO?    ", [
@@ -799,7 +1112,7 @@ def write_essay():
     print("E...N...")
     pause()
     print("AND YOUR HAND FALLS OFF. OWW!")
-    game_over()
+    game_over("hand_falls_off")
 
 def play_gameboy():
     print("YOU PLAY YOUR GAME BOY ALL PERIOD. COOL.")
@@ -849,7 +1162,7 @@ def lunch_hellno():
     print("OKAY, SHE SAYS SADLY.")
     pause()
     print("HOW DUMB CAN YOU POSSIBLY BE???")
-    game_over()
+    game_over("reject_girl")
 
 def lunch_eat2():
     pause()
@@ -866,7 +1179,7 @@ def lunch_library():
     print("SOMEONE RELEASED POISONOUS METHANE GAS IN THE LIBRARY.")
     pause()
     print("YOU CHOKE ON YOUR FINAL BREATH OF AIR.")
-    game_over()
+    game_over("methane_gas")
 
 def lunch_pizza():
     print("YUM!")
@@ -875,11 +1188,11 @@ def lunch_pizza():
 
 def lunch_beef():
     print("MAD COW DISEASE...?")
-    game_over()
+    game_over("mad_cow")
 
 def lunch_chicken():
     print("HMM... SALMONELLA...?")
-    game_over()
+    game_over("salmonella")
 
 def after_lunch():
     choice = menu("   WHERE TO?    ", [
@@ -890,7 +1203,7 @@ def after_lunch():
 
 def lunch_online():
     print("THE SCREEN FLASHES AND YOU HAVE A SEIZURE.")
-    game_over()
+    game_over("seizure")
 
 def lunch_next_class():
     print("WALKING TO NEXT CLASS.")
@@ -943,7 +1256,7 @@ def donut_yes():
 
 def donut_no():
     print("YOU FALL ASLEEP WITH YOUR FACE IN HYDROCHLORIC ACID!")
-    game_over()
+    game_over("acid_face")
 
 def donut_give():
     print("YOU HAND IT TO HIM. HE EATS IT. BEFORE HE CAN BEAT YOU DOWN, HE CHOKES ON THE DONUT AND DIES.")
@@ -956,7 +1269,7 @@ def donut_give():
 
 def donut_refuse():
     print("WHAT HAPPENS NEXT? I'LL LEAVE THAT TO YOUR IMAGINATION...")
-    game_over()
+    game_over("refused_donut")
 
 def after_donut():
     print("IT WASN'T YOUR FAULT HE HAD TERRIBLE KARMA.")
@@ -995,14 +1308,14 @@ def walk_around():
         print("SHE UNWRAPS HER TOWEL AND...")
         pause()
         print("YOU ARE BOTH RUN DOWN BY A HERD OF RAGING BUFFALO.")
-        game_over()
+        game_over("buffalo_stampede")
     else:
         print("THERE IS NO ONE IN SIGHT.")
         pause()
         print("YOU MISSED THE BUS AND TRY TO MAKE THE 10 MILE WALK HOME.")
         pause()
         print("YOU ARE ALMOST HOME, BUT YOU ARE ABDUCTED BY ALIENS.")
-        game_over()
+        game_over("alien_abduction")
 
 def bus_end_menu():
     choice = menu("   ON THE BUS   ", [
@@ -1023,7 +1336,7 @@ def bus_gameboy():
     print("YOU GET REALLY, REALLY PI55ED.")
     pause()
     print("YOUR PULSE RISES TO 400 BEATS PER MINUTE.")
-    game_over()
+    game_over("gameboy_rage")
 
 def bus_cd():
     print("YOU LISTEN TO A CD, AND SOMETHING WEIRD HAPPENS.")
@@ -1031,7 +1344,7 @@ def bus_cd():
     print("YOU GET THE URGE TO JUMP OUT OF THE MOVING BUS.")
     pause()
     print("BUT WHY? IT SEEMS SOME BASTARD REPLACED YOUR GREEN DAY CD WITH THE SOUNDTRACK FROM ANNIE.")
-    game_over()
+    game_over("annie_cd")
 
 def bus_sleep():
     print("YOU LOOK OUT THE WINDOW AND SEE A BILLBOARD WITH THE GIRL FROM LUNCH ON IT.")
@@ -1058,7 +1371,7 @@ def bus_talk():
     print("THEN THEY THROW YOU OUT THE WINDOW.")
     pause()
     print("FOR NO APPARENT REASON.")
-    game_over()
+    game_over("bus_window")
 
 def bus_arrival():
     print("THE BUS GETS TO YOUR STOP AND YOU GET OUT.")
@@ -1076,19 +1389,19 @@ def after_bus_menu():
 
 def go_home():
     print("I SHOULD SMACK YOU FOR THINKING OF GOING RIGHT HOME!")
-    game_over()
+    game_over("quit_early")
 
 def go_eat():
     print("YOU GO TO MCDONALDS.")
     pause()
     print("YOU EAT ONE FRY. ONE FRY TOO MANY. THE GREASE CLOGS YOUR ARTERIES AND YOU HAVE A HEART ATTACK.")
-    game_over()
+    game_over("mcdonalds_fry")
 
 def stare_sun():
     print("YOU STARE AT THE SUN.")
     pause()
     print("YOUR RETINAS BURN AS YOU ARE CROSSING THE STREET AND YOU ARE BLINDED.")
-    game_over()
+    game_over("sun_blindness")
 
 def whistle():
     print("YOU WHISTLE A HAPPY TUNE.")
@@ -1122,11 +1435,11 @@ def airport_action_menu():
 
 def airport_eat():
     print("YOU EAT A TUNA SANDWHICH THEN REALIZE THAT THE TUNA'S NOT DEAD YET...")
-    game_over()
+    game_over("live_tuna")
 
 def airport_home():
     print("YOU'RE KIDDING.")
-    game_over()
+    game_over("airport_quit")
 
 def airport_buy():
     if state["cash"] != 10000000:
@@ -1155,8 +1468,8 @@ def iraq():
     pause()
     print("YOU MEET SADAAM HUSSEIN.")
     pause()
-    print("HE THINKS YOU'RE AN ASASIN AND THE GUARDS TAKE YOU OUT.")
-    game_over()
+    print("HE THINKS YOU'RE AN ASSASSIN AND THE GUARDS TAKE YOU OUT.")
+    game_over("iraq_guards")
 
 def kyoto():
     print("YOU VISIT NINTENDO HQ IN KYOTO.")
@@ -1164,7 +1477,7 @@ def kyoto():
     print("YOU TRY TO STEAL A GAME BOY ADVANCE PROTOTYPE")
     pause()
     print("DONKEY KONG STOPS YOU, AND TOSSES YOU INTO OBLIVION.")
-    game_over()
+    game_over("donkey_kong")
 
 def texas():
     print("YOU GO TO TEXAS. YOU WALK AROUND THE STREETS.")
@@ -1205,11 +1518,11 @@ def texas_give():
         print("YOU REACH INTO YOUR BACKPACK AND COME UP EMPTY.")
         pause()
         print("UH-OH...")
-        game_over()
+        game_over("hostage_fail")
 
 def texas_no():
     print("YOU RUN AWAY, BUT YOUR BAD KARMA CATCHES UP WITH YOU...")
-    game_over()
+    game_over("texas_karma")
 
 def plane_menu():
     choice = menu("  DO WHAT NOW?  ", [
@@ -1222,7 +1535,7 @@ def scalp_ticket():
     print("YOU SELL THE TICKET AND MAKE SOME MONEY, BUT YOU ARE STRANDED IN TEXAS!")
     pause()
     print("YOU TRY WALKING HOME, BUT YOU OBVIOUSLY DON'T MAKE IT.")
-    game_over()
+    game_over("walk_texas")
 
 def board_plane():
     print("YOU EXCITEDLY BOARD THE PLANE TO GO HOME BUT PROMPTLY FALL ASLEEP.")
@@ -1296,7 +1609,7 @@ def area51_eat():
     print("NOT BAD, BUT IT COULD HAVE USED SOME SALT.")
     pause()
     print("YOU THEN EXPERIENCE THE WORST CASE OF INDIGESTION EVER")
-    game_over()
+    game_over("book_indigestion")
 
 def area51_read():
     print("YOU OPEN THE BOOK AND A KEY FALLS OUT.")
@@ -1317,8 +1630,8 @@ def area51_room_menu():
     choice()
 
 def area51_wrong_room():
-    print("IF THAT'S TOO HARD, WHY DO YOU HAVE A GRAPHING CALC.?")
-    game_over()
+    print("IF THAT'S TOO HARD, WHY DO YOU EVEN HAVE A GRAPHING CALCULATOR?")
+    game_over("math_fail")
 
 def area51_right_room():
     print("GOOD JOB!")
@@ -1342,13 +1655,13 @@ def area51_leak():
     print("AHHHHH...")
     pause()
     print("BUT YOU SOMEHOW MANAGE TO GET FLUSHED DOWN THE TOILET.")
-    game_over()
+    game_over("toilet_flush")
 
 def area51_drink():
     print("YOU SICKEN ME!")
     pause()
     print("SO MUCH SO THAT I THINK YOU SHOULD DIE.")
-    game_over()
+    game_over("toilet_drink")
 
 def area51_look():
     print("YOU LOOK AT THE AIR VENT AND GET A SUDDEN URGE TO CLIMB THROUGH IT")
@@ -1361,7 +1674,7 @@ def area51_nap():
     print("YOU TAKE A NAP. BUT AS YOU DO, YOU BREATHE IN TOO MUCH FLATULENCE.")
     pause()
     print("YOUR LUNGS CAN'T TAKE IT.")
-    game_over()
+    game_over("toxic_nap")
 
 def area51_vent():
     print("YOU CRAWL ON YOUR HANDS AND KNEES, UNTIL YOU FINALLY SEE A LIGHT AT THE END OF THE TUNNEL.")
@@ -1391,20 +1704,20 @@ def area51_courtyard_menu():
 
 def area51_bite():
     print("YOU TAKE A BIG BITE OUT OF AN ALIEN'S JUGULAR VEIN. YOU ARE SPRAYED WITH ITS ACIDIC BLOOD.")
-    game_over()
+    game_over("alien_blood")
 
 def area51_sing():
     print("YOU START TO SING ALONG WITH THE SONG.")
     pause()
     print("NOW I MUST SMACK YOU.")
-    game_over()
+    game_over("ymca_smack")
 
 def area51_dance():
     print("YOU START TO DANCE ALONG WITH THE ALIENS. THEY ALL POINT AND LAUGH AT YOU.")
     pause()
-    print("SELF-ESTEEM METER: |-| |-| |-| |-| |-| |-| |-|")
+    print("SELF-ESTEEM METER: |0| |-| |-| |-| |-| |-| |-|")
     pause()
-    game_over()
+    game_over("alien_dance")
 
 def area51_jokes():
     print("YOU WALK TO THE FRONT OF THE CROWD AND START TO RECITE A JERRY SEINFELD STAND-UP ROUTINE")
@@ -1486,8 +1799,10 @@ def final_giveup():
     print("WHAT KIND OF LOSER ARE YOU!?!")
     pause()
     print("YOU CAME ALL THIS WAY FOR... NOTHING!")
-    pause("Press Send to roll the credits...")
-    game_over()
+    wait()
+    print("YOU LOSER.")
+    pause("Press Enter to roll the credits...")
+    game_over("final_loser")
 
 def final_scream():
     print("YOU SCREAM AS LOUD AS YOU CAN.")
@@ -1498,8 +1813,8 @@ def final_scream():
     pause()
     print("IT DOES.")
     wait()
-    pause("Press Send to roll the credits...")
-    game_over()
+    pause("Press Enter to roll the credits...")
+    game_over("monday_revenge")
 
 def final_dig():
     print("YOU BEGIN TO DIG FOR NO APPARENT REASON.")
@@ -1532,11 +1847,13 @@ def final_dig():
     print("THIS DAY WAS AWESOME!\n\n")
     wait()
     print("      ROLL\n      THE\n    CREDITS!   ")
-    pause("Press Send to roll the credits...")
+    pause("Press Enter to roll the credits...")
     state["times_good_ending"] += 1
     credits()
 
-def game_over():
+def game_over(death_cause=""):
+    if death_cause:
+        record_death(death_cause)
     save_stats()
     print("\n---GAME--OVER---\nMONDAY HAS CLAIMED ANOTHER VICTIM!\n\nTRY AGAIN!")
     pause()
