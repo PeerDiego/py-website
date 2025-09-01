@@ -320,7 +320,7 @@ async function initializePyodide() {
         }
 
         console.log('Loading Pyodide...');
-        addMessage('system', 'Initializing Python environment... Please wait.');
+        addMessage('system', 'Initializing Python environment... Please wait.', { 'data-message-type': 'pre-game' });
         status.textContent = 'Loading Pyodide...';
         
         pyodide = await loadPyodide({
@@ -404,7 +404,7 @@ import time
 time.sleep = new_sleep
 
 PYODIDE_ENV = True
-print("Game loaded...")
+# print("Game loaded...") # removed in lieu of an addMessage() version a few lines down.  # Uncomment for debugging if python doesn't appear to work.
         `);
         
         isInitialized = true;
@@ -417,7 +417,8 @@ print("Game loaded...")
         runScriptButton.disabled = false;
         userInput.placeholder = 'Type a message...';
         
-        addMessage('system', 'Python environment initialized successfully! Click "Play Game" to start.');
+        addMessage('system', 'Game loaded...', { 'data-message-type': 'pre-game' });
+        addMessage('system', 'Python environment initialized successfully! Click "Play Game" to start.', { 'data-message-type': 'pre-game' });
         
         // Focus the run button and add keyboard listener
         runScriptButton.focus();
@@ -464,9 +465,14 @@ print("Thanks for testing the interactive chat!")
 }
 
 // Add message to chat
-function addMessage(type, content, timestamp = null) {
+function addMessage(type, content, attributes = {}) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}-message`;
+    
+    // Add any custom data attributes
+    for (const [key, value] of Object.entries(attributes)) {
+        messageDiv.setAttribute(key, value);
+    }
     
     const contentDiv = document.createElement('div');
     contentDiv.className = 'message-content';
@@ -474,7 +480,7 @@ function addMessage(type, content, timestamp = null) {
     
     const timestampDiv = document.createElement('div');
     timestampDiv.className = 'timestamp';
-    timestampDiv.textContent = timestamp || new Date().toLocaleTimeString();
+    timestampDiv.textContent = new Date().toLocaleTimeString();
     
     messageDiv.appendChild(contentDiv);
     messageDiv.appendChild(timestampDiv);
@@ -527,6 +533,14 @@ async function runPythonProgram() {
     
     // Add compact header class for mobile/tablet views
     header.classList.add('game-running');
+    
+    // Fade out pre-game messages in reverse order when Play Game is clicked
+    const preGameMessages = Array.from(document.querySelectorAll('[data-message-type="pre-game"]'));
+    preGameMessages.reverse().forEach((msg, index) => {
+        setTimeout(() => {
+            msg.classList.add('fade-out');
+        }, index * 200); // 200ms delay between each fade
+    });
     
     // swapping for a debug message instead
     // addMessage('system', 'Starting Python program...');

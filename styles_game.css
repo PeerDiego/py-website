@@ -9,6 +9,23 @@
     box-sizing: border-box;
 }
 
+/* Pre-game message transitions */
+[data-message-type="pre-game"] {
+    opacity: 1;
+    max-height: 50px;
+    margin: 8px 0;
+    transition: all 0.3s ease-in-out;
+}
+
+[data-message-type="pre-game"].fade-out {
+    opacity: 0;
+    max-height: 0;
+    margin: 0;
+    font-size: 0.8em;
+    overflow: hidden;
+    pointer-events: none;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
