@@ -101,12 +101,14 @@
             <div class="input-container">
                 <div class="input-group">
                     <input type="text" id="user-input" placeholder="Waiting for program..." disabled>
-                    <button id="send-button" disabled>Enter</button>
+                    <!-- Hiding Enter button to force users to use keyboard. Can't comment out or app.js will fail to load. -->
+                    <button id="send-button" hidden disabled>Enter</button>
+                    <button id="run-script-button" disabled>Play Game</button>
                 </div>
                 <div class="controls">
                     <input type="hidden" id="python-file" value="monday.py">
-                    <button id="run-script-button" disabled>Play Game</button>
-                    <button id="clear-button">Clear History</button>
+                    <!-- Moving "Play Game" button up, to next to text box -->
+                    <button id="clear-button" hidden>Clear History</button>
                 </div>
             </div>
         </div>

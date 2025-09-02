@@ -415,10 +415,10 @@ PYODIDE_ENV = True
         userInput.disabled = false;
         sendButton.disabled = false;
         runScriptButton.disabled = false;
-        userInput.placeholder = 'Type a message...';
+        userInput.placeholder = 'Waiting for game to start...';
         
-        addMessage('system', 'Game loaded...', { 'data-message-type': 'pre-game' });
-        addMessage('system', 'Python environment initialized successfully! Click "Play Game" to start.', { 'data-message-type': 'pre-game' });
+        // addMessage('system', 'Game loaded...', { 'data-message-type': 'pre-game' });
+        addMessage('system', 'Game loaded successfully! Click "Play Game" to start.', { 'data-message-type': 'pre-game' });
         
         // Focus the run button and add keyboard listener
         runScriptButton.focus();
@@ -506,7 +506,7 @@ function getUserInput(prompt) {
         
         // Set up the input waiting state
         isWaitingForInput = true;
-        userInput.placeholder = 'Enter your response...';
+        userInput.placeholder = 'Enter your choice...';
         userInput.disabled = false;
         userInput.focus();
         
@@ -514,7 +514,7 @@ function getUserInput(prompt) {
         inputResolver = (value) => {
             console.log('Input received:', value || "(empty input)");
             isWaitingForInput = false;
-            userInput.placeholder = 'Type a message...';
+            userInput.placeholder = 'Waiting for game...';
             inputResolver = null;
             resolve(value || '');
         };
@@ -566,7 +566,7 @@ await main()
         // Re-enable the Play Game button and restore header
         runScriptButton.disabled = false;
         header.classList.remove('game-running');
-        addMessage('system', 'Game finished. Click "Play Game" to start again.');
+        addMessage('system', 'Game finished. Click "Play Game" to start again.', { 'data-message-type': 'pre-game' });
         runScriptButton.focus();
     } catch (error) {
         console.error('Program execution error:', error);
@@ -577,6 +577,13 @@ await main()
 // Handle user input
 function handleUserInput() {
     const input = userInput.value.trim();
+    
+    // Check for clear commands before any other processing
+    if (['clear', 'cls'].includes(input.toLowerCase())) {
+        clearChat();
+        userInput.value = '';
+        return;
+    }
     
     // Only proceed if we're waiting for input from Python
     if (isWaitingForInput && inputResolver) {

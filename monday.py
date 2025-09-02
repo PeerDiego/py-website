@@ -376,7 +376,7 @@ def menu(title, options, count_choice=True):
     
     while state["running"]:
         try:
-            choice = int(input("Type in your choice: "))
+            choice = int(input("Choose: "))
             if 1 <= choice <= len(options):
                 if count_choice:
                     state["choices_count"] += 1  # Increment choice counter
