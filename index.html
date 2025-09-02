@@ -101,13 +101,14 @@
             <div class="input-container">
                 <div class="input-group">
                     <input type="text" id="user-input" placeholder="Waiting for program..." disabled>
-                    <!-- Hiding Enter button to force users to use keyboard. Can't comment out or app.js will fail to load. -->
+                    <!-- Hiding Enter button to force users to use keyboard. Don't comment out or app.js will fail to load. -->
                     <button id="send-button" hidden disabled>Enter</button>
                     <button id="run-script-button" disabled>Play Game</button>
                 </div>
                 <div class="controls">
                     <input type="hidden" id="python-file" value="monday.py">
-                    <!-- Moving "Play Game" button up, to next to text box -->
+                    <!-- Moving "Play Game" button up, to next to text box. -->
+                    <!-- Also hiding Clear History button because it's not very useful or necessary, at all, really. -->
                     <button id="clear-button" hidden>Clear History</button>
                 </div>
             </div>
