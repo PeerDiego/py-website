@@ -499,14 +499,15 @@ function getUserInput(prompt) {
     return new Promise((resolve) => {
         console.log('getUserInput called with prompt:', prompt);
         
+        // Experimenting with having the prompt be shown as the textbox's placeholder instead of a system message.
         // Add the prompt message to the chat
-        if (prompt && prompt.trim()) {
-            addMessage('system', prompt);
-        }
+        // if (prompt && prompt.trim()) {
+        //     addMessage('system', prompt);
+        // }
         
         // Set up the input waiting state
         isWaitingForInput = true;
-        userInput.placeholder = 'Enter your choice...';
+        userInput.placeholder = prompt && prompt.trim() ? prompt : 'Enter your choice...';
         userInput.disabled = false;
         userInput.focus();
         
@@ -542,8 +543,6 @@ async function runPythonProgram() {
         }, index * 200); // 200ms delay between each fade
     });
     
-    // swapping for a debug message instead
-    // addMessage('system', 'Starting Python program...');
     debug('app.js', 'Starting Python program...');
     // changes status message from "Python environment ready!" to "Good luck!"
     // status.id=""; // removing #status id to let color be dictated by status-running class
@@ -561,7 +560,15 @@ ${pythonProgram.split('\n').map(line => '    ' + line).join('\n')}
 await main()
         `;
         
+        // Hide Play Game button and show Enter button
+        runScriptButton.setAttribute('hidden', '');
+        sendButton.removeAttribute('hidden');
+        
         await pyodide.runPythonAsync(asyncProgram);
+        
+        // Show Play Game button and hide Enter button
+        runScriptButton.removeAttribute('hidden');
+        sendButton.setAttribute('hidden', '');
 
         // Re-enable the Play Game button and restore header
         runScriptButton.disabled = false;
