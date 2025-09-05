@@ -356,10 +356,12 @@ initialize_game_state()
 #---------------------------------------
 
 def pause(prompt = "Press Enter to continue..."):
-    # Print prompt, wait for Enter, then overwrite the prompt line with spaces
-    input(prompt)  # Removed the \n to keep the prompt on same line
-    # Move cursor up one line and clear it - not needed for web version
-    if not PYODIDE_ENV:
+    if PYODIDE_ENV:
+        wait()
+    elif not PYODIDE_ENV:
+        # Print prompt, wait for Enter, then overwrite the prompt line with spaces
+        input(prompt)  # Removed the \n to keep the prompt on same line
+        # Move cursor up one line and clear it - not needed for web version
         sys.stdout.write("\033[F")  # Move cursor up one line
         sys.stdout.write(" " * len(prompt) + "\r")  # Overwrite with spaces
         sys.stdout.flush()

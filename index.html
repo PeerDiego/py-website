@@ -4,8 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Python Chat Interface</title>
-    <link rel="stylesheet" href="styles_game.css">
+    <link rel="stylesheet" href="styles_terminal.css" id="theme-stylesheet">
+    <link rel="stylesheet" href="theme-switcher.css">
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <script>
+        // Theme switcher functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeSelect = document.getElementById('theme-select');
+            const themeStylesheet = document.getElementById('theme-stylesheet');
+            
+            // Handle theme change
+            themeSelect.addEventListener('change', function() {
+                themeStylesheet.href = this.value;
+                localStorage.setItem('selectedTheme', this.value);
+            });
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('selectedTheme');
+            if (savedTheme) {
+                themeStylesheet.href = savedTheme;
+                themeSelect.value = savedTheme;
+            }
+
+            // Show theme switcher when Alt key is pressed
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Alt') {
+                    document.body.classList.add('alt-pressed');
+                }
+            });
+
+            document.addEventListener('keyup', function(e) {
+                if (e.key === 'Alt') {
+                    document.body.classList.remove('alt-pressed');
+                }
+            });
+        });
+    </script>
     <!-- Early error detection -->
     <script>
         // Create debug overlay only when debug=true in URL
@@ -86,6 +120,13 @@
     </script>
 </head>
 <body>
+    <div id="theme-switcher" class="theme-switcher">
+        <select id="theme-select" title="Theme Selector">
+            <option value="styles_ti83.css">TI-83 Theme</option>
+            <option value="styles_chat.css">Chat Theme</option>
+            <option value="styles_terminal.css">Terminal Theme</option>
+        </select>
+    </div>
     <div class="container">
         <header>
             <h1>Monday, the Game</h1>

@@ -1,0 +1,718 @@
+:root {
+    --input-type: 'numeric';
+    --auto-accept-numeric-input: 'true';
+    --enable-typing-animation: 1;  /* Set to 0 to disable typing animation */
+    
+    /* TI-83 Plus Colors */
+    --ti-screen-bg: #a3a889;     /* LCD screen background - olive green */
+    --ti-screen-border: #969778; /* LCD border - slightly darker than screen */
+    --ti-body-color: #1a1a1a;    /* Calculator body - deep black */
+    --ti-text-color: #232923;    /* Text on LCD - almost black */
+    --ti-button-color: #1a1a1a;  /* Calculator buttons - same as body */
+    --ti-blue-button: #2d4461;   /* Blue buttons - more accurate */
+    --ti-white-button: #e2e2e2;  /* White number buttons - slightly off-white */
+    --ti-header-text: #b8b8b8;   /* Silver/grey text for header */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Pre-game message transitions */
+[data-message-type="pre-game"] {
+    opacity: 1;
+    max-height: 50px;
+    margin: 8px 0;
+    transition: all 0.3s ease-in-out;
+}
+
+[data-message-type="pre-game"].fade-out {
+    opacity: 0;
+    max-height: 0;
+    margin: 0;
+    font-size: 0.8em;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+body {
+    font-family: 'LCD', monospace;
+    background: #2b2b2b;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.container {
+    background: linear-gradient(
+        to bottom,
+        #242424 0%,
+        var(--ti-body-color) 5%,
+        var(--ti-body-color) 95%,
+        #242424 100%
+    );
+    border-radius: 15px 15px 50px 50px;
+    box-shadow: 
+        2px 4px 12px rgba(0,0,0,0.4),
+        -2px 4px 12px rgba(0,0,0,0.4),
+        inset 0 1px 1px rgba(255,255,255,0.05);
+    overflow: hidden;
+    width: 100%;
+    max-width: 600px;
+    min-width: 300px;
+    min-height: min(720px, 85vh);
+    height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 12px 12px 45px 12px;
+    border: 1px solid rgba(0,0,0,0.6);
+    background-image: 
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 2px,
+            rgba(0,0,0,0.1) 2px,
+            rgba(0,0,0,0.1) 3px
+        );
+}
+
+header {
+    background: var(--ti-body-color);
+    color: var(--ti-header-text);
+    padding: 2px 8px 4px;
+    text-align: center;
+    min-height: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.7px;
+    transition: padding 2s ease;
+}
+
+/* Header styles when game is running */
+header.game-running {
+    padding: 8px 10px;
+}
+
+header.game-running h1 {
+    font-size: 1.3rem;
+    margin: 0;
+    line-height: 1.2;
+    flex: 1;
+    width: 100%;
+    text-align: center;
+}
+
+header.game-running p {
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    height: 0;
+    max-height: 0;
+    overflow: hidden;
+    position: absolute;
+    pointer-events: none;
+}
+
+header h1 {
+    margin-bottom: 3px;
+    font-size: 2rem;
+    transition: all 2s ease;
+    line-height: 1.2;
+    font-weight: 500;
+    font-variant: small-caps;
+}
+
+header p {
+    opacity: 0.9;
+    font-size: 1rem;
+    max-height: 100px;
+    margin-top: 5px;
+    transition: all 2s ease;
+    overflow: hidden;
+}
+
+.chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.chat-output {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: linear-gradient(
+        to bottom,
+        var(--ti-screen-bg) 0%,
+        var(--ti-screen-bg) 100%
+    );
+    color: var(--ti-text-color);
+    border: 8px solid var(--ti-screen-border);
+    border-radius: 3px;
+    box-shadow: 
+        inset 0 0 8px rgba(0,0,0,0.1),
+        inset 0 2px 2px rgba(0,0,0,0.15);
+    min-height: 0;
+    max-height: 100%;
+    font-family: 'LCD', monospace;
+    position: relative;
+    margin: 10px 0 25px 0;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+}
+
+.message {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 0.3s ease-in;
+    width: 100%;
+}
+
+/* Hide timestamps */
+.message .timestamp {
+    display: none;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message-content {
+    padding: 12px 16px;
+    border-radius: 8px;
+    white-space: pre-wrap;
+    line-height: 1.5;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* User input style */
+.user-message {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.user-message .message-content {
+    background: transparent;
+    color: var(--ti-text-color);
+    text-align: right;
+    padding-right: 0;
+    max-width: 95%;
+}
+
+/* Game output style (print statements) */
+.python-message .message-content {
+    background: transparent;
+    color: var(--ti-text-color);
+    border: none;
+    padding: 4px 8px 4px 0;
+    white-space: pre-wrap;
+    position: relative;
+    width: 100%;
+    max-width: calc(100% - 16px);
+    overflow: hidden;
+    border-right: 2px solid transparent;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+/* Typing animation (only applied when --enable-typing-animation is 1) */
+.python-message .message-content {
+    animation: none;
+    animation: typing calc(1s * var(--enable-typing-animation)) steps(30, end);
+}
+
+/* Last message cursor (only when animation enabled) */
+.python-message:last-child .message-content {
+    border-right-color: calc(var(--enable-typing-animation) * var(--ti-text-color));
+    animation: 
+        typing calc(1s * var(--enable-typing-animation)) steps(30, end),
+        blink calc(1s * var(--enable-typing-animation)) step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink {
+    from, to { border-right-color: transparent; }
+    50% { border-right-color: var(--ti-text-color); }
+}
+
+/* System messages (like "Press Enter to continue...") */
+.system-message .message-content {
+    background: transparent;
+    color: var(--ti-text-color);
+    font-style: normal;
+    font-size: 0.9em;
+    padding: 4px 8px;
+}
+
+.input-container {
+    padding: 15px 15px 5px;
+    background: var(--ti-body-color);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+/* Make input field stretch */
+.input-group #user-input {
+    flex: 1;
+    width: 100%;
+}
+
+/* Make send button not stretch */
+.input-group #send-button {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+#user-input {
+    flex: 1;
+    padding: 12px 20px;
+    border: 8px solid var(--ti-body-color);
+    border-radius: 6px;
+    font-family: 'LCD', monospace;
+    font-size: 16px;
+    background: var(--ti-screen-bg);
+    color: var(--ti-text-color);
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 
+        inset 0 0 10px rgba(0,0,0,0.2),
+        inset 0 2px 5px rgba(0,0,0,0.3),
+        0 0 1px rgba(0,0,0,0.5);
+    /* Style for numeric input */
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+#user-input:focus {
+    border-color: var(--ti-body-color);
+    box-shadow: 
+        inset 0 0 10px rgba(0,0,0,0.2),
+        inset 0 2px 5px rgba(0,0,0,0.3),
+        0 0 2px rgba(0,0,0,0.5),
+        0 0 10px rgba(27, 40, 20, 0.3);
+}
+
+#user-input:disabled {
+    background: #1a1a1a;
+    border-color: #333;
+    color: #666;
+    cursor: not-allowed;
+}
+
+#send-button {
+    background: linear-gradient(to bottom, #3a5273 0%, #324b6b 100%);
+    border: 1px solid rgba(0,0,0,0.6);
+    border-radius: 4px;
+    padding: 6px 14px;
+    color: white;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.08s ease;
+    box-shadow: 
+        0 1.5px 0 rgba(0,0,0,0.4),
+        inset 0 1px 1px rgba(255,255,255,0.2);
+    position: relative;
+    transform: translateY(0);
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.4);
+    margin: 2px;
+}
+
+#send-button:hover:not(:disabled) {
+    background: linear-gradient(to bottom, #405778 0%, #385272 100%);
+    color: white;
+    transform: translateY(0.5px);
+    box-shadow: 
+        0 1px 0 rgba(0,0,0,0.4),
+        inset 0 1px 1px rgba(255,255,255,0.15);
+}
+
+#send-button:active:not(:disabled) {
+    transform: translateY(1.5px);
+    box-shadow: 
+        0 0px 0 rgba(0,0,0,0.4),
+        inset 0 1px 2px rgba(0,0,0,0.2);
+    background: linear-gradient(to bottom, #2d4058 0%, #324b6b 100%);
+}
+
+#send-button:disabled {
+    border-color: #333;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+#run-script-button, #clear-button {
+    padding: 8px 16px;
+    border: 1px solid rgba(0,0,0,0.4);
+    border-radius: 6px;
+    background: var(--ti-white-button);
+    color: var(--ti-body-color);
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    box-shadow: 
+        0 2px 0 rgba(0,0,0,0.3),
+        inset 0 1px 1px rgba(255,255,255,0.8);
+}
+
+#run-script-button {
+    border-color: #0a0;
+    color: #0a0;
+}
+
+#run-script-button:hover:not(:disabled) {
+    background: #0a0;
+    color: #1a1a1a;
+}
+
+#clear-button {
+    border-color: #a00;
+    color: #a00;
+}
+
+#clear-button:hover {
+    background: #a00;
+    color: #1a1a1a;
+}
+
+button:disabled {
+    border-color: #333 !important;
+    color: #666 !important;
+    cursor: not-allowed !important;
+    background: #1a1a1a !important;
+}
+
+/* Loading spinner */
+.status-bar {
+    background: var(--ti-body-color);
+    padding: 5px 15px 10px;
+    color: #666;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Status running state */
+.status-running {
+    color: #0f0;  /* Neon green base color */
+    text-shadow: 0 0 1px #0f0,    /* Tighter glow */
+                0 0 2px #0f0;
+    animation: neon-pulse 5s ease-in-out infinite;
+}
+
+@keyframes neon-pulse {
+    0%, 100% { opacity: 0.8; }    /* Full brightness */
+    50% { opacity: 0.5; }      /* Less dim at lowest point */
+}
+
+#status {
+    color: #0f0;
+}
+
+#python-version {
+    color: #666;
+}
+
+#python-version a {
+    color: #4aa;  /* Cyan-ish color that stands out as a link */
+    text-decoration: none;
+    border-bottom: 1px dotted #4aa;  /* Subtle underline to indicate it's clickable */
+    transition: all 0.2s ease;
+}
+
+#python-version a:hover {
+    color: #0f0;  /* Match the bright green on hover */
+    text-shadow: 0 0 2px rgba(0, 255, 0, 0.2);  /* Subtle glow effect */
+    border-bottom-color: #0f0;  /* Match the hover color */
+}
+
+#python-version a:visited {
+    color: #668;  /* Muted blue-gray for visited */
+    border-bottom-color: #668;
+}
+
+#python-version a:visited:hover {
+    color: #0f0;  /* Same hover color for consistency */
+    border-bottom-color: #0f0;
+}
+
+.loading {
+    display: inline-block;
+    margin-left: 10px;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(0, 255, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #0f0;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Scrollbar styling */
+.chat-output::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-output::-webkit-scrollbar-track {
+    background: var(--ti-screen-bg);
+    border: 1px solid var(--ti-screen-border);
+}
+
+.chat-output::-webkit-scrollbar-thumb {
+    background: #8b907a;  /* Darker than screen border for visibility */
+    border-radius: 4px;
+    border: 1px solid var(--ti-screen-border);
+}
+
+.chat-output::-webkit-scrollbar-thumb:hover {
+    background: #7e826f;  /* Even darker on hover */
+}
+
+/* Firefox scrollbar styles */
+.chat-output {
+    scrollbar-width: thin;
+    scrollbar-color: #8b907a var(--ti-screen-bg);
+}
+
+/* Mobile responsive styles */
+/* Mobile-first responsive design */
+@media screen and (max-width: 600px) {
+    /* Container and body adjustments */
+    body {
+        padding: 5px;  /* Reduce the purple background padding */
+    }
+    
+    .container {
+        margin: 0;
+        min-height: calc(100vh - 10px);
+        border-radius: 8px;
+    }
+
+    /* Compact header when game is running */
+    header.game-running {
+        padding: 12px 10px;  /* Increased from 8px to 12px top/bottom */
+    }
+    
+    header.game-running h1 {
+        font-size: 1.3rem;
+        margin: 0;  /* Reset margins */
+        line-height: 31px;  /* Match the header's min-height */
+        height: 31px;  /* Explicit height to match min-height */
+    }
+    
+    header.game-running p {
+        opacity: 0;
+        margin-top: -20px;
+        max-height: 0;
+        overflow: hidden;
+    }
+
+    /* Header adjustments */
+    header {
+        padding: 15px 10px;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+        margin-bottom: 4px;
+    }
+
+    header p {
+        font-size: 0.9rem;
+        line-height: 1.3;
+    }
+
+    /* Chat output adjustments */
+    .chat-output {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .python-message .message-content {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .system-message .message-content {
+        font-size: calc(0.8em * 14px / 16px);  /* Maintain the same relative size as non-mobile */
+        padding: 6px 8px;
+    }
+
+    /* Input container adjustments */
+    .input-container {
+        padding: 8px;
+        gap: 8px;
+    }
+
+    .input-group {
+        gap: 6px;
+    }
+
+    #user-input {
+        padding: 8px 12px;
+        font-size: 14px;
+        min-height: 36px;
+    }
+
+    #send-button {
+        padding: 8px 15px;
+        font-size: 14px;
+        min-width: 60px;
+    }
+
+    /* Control buttons adjustments */
+    .controls {
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    #run-script-button, #clear-button {
+        padding: 6px 12px;
+        font-size: 13px;
+        flex: 1;
+        min-width: 120px;
+    }
+
+    /* Status bar adjustments */
+    .status-bar {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+}
+
+@media screen and (min-width: 601px) and (max-width: 900px) {
+    header h1 {
+        font-size: 1.9rem;
+    }
+
+    /* Compact header when game is running */
+    header.game-running {
+        padding: 15px;  /* Slightly more padding */
+    }
+    
+    header.game-running h1 {
+        font-size: 1.5rem;
+        margin-bottom: 2px;  /* Small margin instead of 0 */
+        line-height: 1.2;  /* Ensure enough height for the text */
+    }
+    
+    header.game-running p {
+        opacity: 0;
+        margin-top: -20px;
+        max-height: 0;
+        overflow: hidden;
+    }
+
+    .python-message .message-content {
+        font-size: 15px;
+    }
+
+    .system-message .message-content {
+        font-size: calc(0.8em * 15px / 16px);  /* Maintain the same relative size */
+    }
+
+    .chat-output {
+        padding: 15px 15px 30px 15px;
+    }
+
+    .input-container {
+        padding: 10px;
+    }
+
+    #user-input, #send-button {
+        font-size: 15px;
+        padding: 10px 15px;
+    }
+
+    .controls button {
+        font-size: 13px;
+        padding: 8px 14px;
+    }
+}
+
+
+
+
+
+.status-running-rainbox {
+  background: linear-gradient(
+    45deg,
+    #ff0000 0%,
+    #ff8000 14.28%,
+    #ffff00 28.56%,
+    #80ff00 42.84%,
+    #00ff00 57.12%,
+    #00ff80 71.4%,
+    #00ffff 85.68%,
+    #0080ff 100%
+  );
+  background-size: 200% 200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: rainbow-shift 3s ease-in-out infinite;
+  font-weight: 600;
+  display: inline-block;
+}
+
+@keyframes rainbow-shift {
+  0%,
+  100% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+}
+
+/* Fallback for browsers that don't support background-clip: text */
+@supports not (background-clip: text) {
+  .status-running-rainbox {
+    background: none;
+    color: #ff6b6b;
+    text-shadow: 1px 1px 0 #ff8000, 2px 2px 0 #ffff00, 3px 3px 0 #80ff00, 4px 4px 0 #00ff00;
+  }
+}

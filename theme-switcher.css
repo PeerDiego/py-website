@@ -1,0 +1,17 @@
+#theme-switcher {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 1000;
+    background: #fff;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+#theme-switcher:hover,
+#theme-switcher.active {
+    opacity: 1;
+}
